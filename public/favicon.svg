@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" fill="none" viewBox="0 0 48 48">
+  <!-- Background circle -->
+  <circle cx="24" cy="24" r="24" fill="#aa3bff"/>
+
+  <!-- M letterform -->
+  <path
+    d="M11 34V15l8 12 8-12v19"
+    stroke="#fff"
+    stroke-width="4.5"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+    fill="none"
+  />
+
+  <!-- Accent dot -->
+  <circle cx="37.5" cy="15" r="3.5" fill="#fff" opacity="0.9"/>
+</svg>

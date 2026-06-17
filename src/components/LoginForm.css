@@ -1,0 +1,129 @@
+.login-card {
+  width: 100%;
+  max-width: 400px;
+  margin: 80px auto;
+  padding: 40px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  box-shadow: var(--shadow);
+  text-align: left;
+  box-sizing: border-box;
+}
+
+.login-header {
+  text-align: center;
+  margin-bottom: 32px;
+}
+
+.login-logo {
+  margin-bottom: 16px;
+}
+
+.login-logo img {
+  width: 75px;
+  height: 75px;
+  object-fit: contain;
+  border-radius: 50%;
+}
+
+.login-header h1 {
+  font-size: 28px;
+  margin: 0 0 8px;
+  letter-spacing: -0.5px;
+}
+
+.login-header p {
+  color: var(--text);
+  font-size: 15px;
+}
+
+.login-field {
+  margin-bottom: 20px;
+}
+
+.login-field label {
+  display: block;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-h);
+  margin-bottom: 6px;
+}
+
+.login-field input {
+  width: 100%;
+  padding: 10px 14px;
+  font-size: 15px;
+  font-family: var(--sans);
+  color: var(--text-h);
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  outline: none;
+  box-sizing: border-box;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.login-field input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-bg);
+}
+
+.login-field input.has-error {
+  border-color: #ef4444;
+}
+
+.login-field input.has-error:focus {
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.15);
+}
+
+.login-error {
+  display: block;
+  color: #ef4444;
+  font-size: 13px;
+  margin-top: 4px;
+}
+
+.login-submit {
+  width: 100%;
+  padding: 12px;
+  font-size: 15px;
+  font-weight: 600;
+  font-family: var(--sans);
+  color: #fff;
+  background: #3b82f6;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: opacity 0.15s;
+  margin-top: 8px;
+}
+
+.login-submit:hover {
+  opacity: 0.9;
+}
+
+.login-submit:focus-visible {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+}
+
+.login-success {
+  text-align: center;
+  padding: 20px 0;
+}
+
+.login-icon.check {
+  width: 48px;
+  height: 48px;
+  color: var(--accent);
+  margin-bottom: 16px;
+}
+
+.login-success h2 {
+  margin-bottom: 8px;
+}
+
+.login-success p {
+  font-size: 15px;
+}

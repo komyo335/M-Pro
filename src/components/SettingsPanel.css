@@ -1,0 +1,282 @@
+/* ============================================
+   Settings Panel — layout & theming
+   Uses design tokens from src/index.css
+   ============================================ */
+
+.settings-panel {
+  flex: 1;
+  overflow-y: auto;
+  padding: 24px 32px;
+  display: flex;
+  justify-content: center;
+}
+
+.settings-inner {
+  width: 100%;
+  max-width: 560px;
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+
+/* ---- Header ---- */
+.settings-header h2 {
+  margin: 0 0 6px;
+  font-size: 22px;
+}
+
+.settings-subtitle {
+  margin: 0;
+  font-size: 14px;
+  color: var(--text);
+}
+
+/* ---- Section ---- */
+.settings-section {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.settings-section-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-h);
+  margin: 0;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border);
+}
+
+.settings-section-desc {
+  font-size: 13px;
+  color: var(--text);
+  margin: 0;
+  margin-top: -8px;
+}
+
+/* ---- Fieldset / legend ---- */
+.settings-fieldset {
+  border: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.settings-legend {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 0;
+  margin-bottom: 2px;
+}
+
+/* ---- Radio card group ---- */
+.settings-radio-group {
+  display: flex;
+  gap: 8px;
+}
+
+.settings-radio-card {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 14px 12px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  cursor: pointer;
+  transition: border-color 0.15s, box-shadow 0.15s, background 0.15s;
+  text-align: center;
+}
+
+.settings-radio-card:hover {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
+}
+
+.settings-radio-card.active {
+  border-color: #3b82f6;
+  background: rgba(59, 130, 246, 0.06);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.12);
+}
+
+.settings-radio-card:focus-within {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+}
+
+.settings-radio-input {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.settings-radio-icon {
+  font-size: 24px;
+  line-height: 1;
+}
+
+.settings-radio-label {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-h);
+}
+
+/* ---- Font preview ---- */
+.settings-font-preview {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--text);
+  font-family: var(--sans);
+  line-height: 1;
+}
+
+.settings-font-preview[data-size="small"] {
+  font-size: 14px;
+}
+
+.settings-font-preview[data-size="large"] {
+  font-size: 22px;
+}
+
+/* ---- Toggle list ---- */
+.settings-toggle-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.settings-toggle {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.settings-toggle:hover {
+  background: var(--code-bg);
+}
+
+.settings-toggle-icon {
+  font-size: 20px;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.settings-toggle-label {
+  flex: 1;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-h);
+}
+
+/* ---- Toggle switch ---- */
+.settings-switch {
+  position: relative;
+  width: 44px;
+  height: 24px;
+  border-radius: 12px;
+  border: none;
+  cursor: pointer;
+  transition: background 0.2s;
+  flex-shrink: 0;
+  padding: 0;
+}
+
+.settings-switch.on {
+  background: #3b82f6;
+}
+
+.settings-switch.off {
+  background: var(--border);
+}
+
+.settings-switch:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.settings-switch:focus-visible {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+}
+
+.settings-switch-thumb {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+  transition: transform 0.2s;
+}
+
+.settings-switch.on .settings-switch-thumb {
+  transform: translateX(20px);
+}
+
+/* ---- Reset ---- */
+.settings-reset {
+  align-items: flex-start;
+  padding-top: 8px;
+  border-top: 1px solid var(--border);
+}
+
+.settings-reset-btn {
+  padding: 8px 16px;
+  font-size: 13px;
+  font-family: var(--sans);
+  font-weight: 500;
+  color: #ef4444;
+  background: transparent;
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.settings-reset-btn:hover {
+  background: rgba(239, 68, 68, 0.08);
+  border-color: rgba(239, 68, 68, 0.5);
+}
+
+.settings-reset-btn:focus-visible {
+  outline: 2px solid #ef4444;
+  outline-offset: 2px;
+}
+
+/* ---- Responsive ---- */
+@media (max-width: 768px) {
+  .settings-panel {
+    padding: 16px;
+  }
+
+  .settings-inner {
+    max-width: 100%;
+  }
+
+  .settings-radio-group {
+    flex-direction: column;
+  }
+
+  .settings-radio-card {
+    flex-direction: row;
+    justify-content: flex-start;
+    gap: 10px;
+    padding: 12px 14px;
+  }
+}

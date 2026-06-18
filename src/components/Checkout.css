@@ -216,6 +216,13 @@
   gap: 8px;
 }
 
+.checkout-no-payments {
+  font-size: 13px;
+  color: var(--text);
+  padding: 8px 0;
+  margin: 0;
+}
+
 .checkout-payment-option {
   flex: 1;
   display: flex;

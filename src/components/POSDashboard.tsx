@@ -1,5 +1,5 @@
-import { useState, useMemo } from 'react';
-import type { CartItem } from '../data/products';
+import { useState, useMemo, useEffect } from 'react';
+import type { CartItem, Order } from '../data/products';
 import {
   PRODUCTS,
   CATEGORIES,
@@ -7,8 +7,38 @@ import {
   calcTax,
   calcItemCount,
   formatCurrency,
+  loadOrders,
 } from '../data/products';
+import SettingsPanel from './SettingsPanel';
+import OrdersPanel from './OrdersPanel';
+import CustomerManagement from './CustomerManagement';
+import ReportsPanel from './ReportsPanel';
 import './POSDashboard.css';
+
+/* ---------- daily-sales persistence ---------- */
+const SALES_KEY = 'mpro_daily_sales';
+
+function getTodayKey(): string {
+  const d = new Date();
+  return `${d.getFullYear()}-${d.getMonth() + 1}-${d.getDate()}`;
+}
+
+function loadDailySales(): number {
+  try {
+    const raw = localStorage.getItem(SALES_KEY);
+    if (!raw) return 0;
+    const data = JSON.parse(raw);
+    if (data.date === getTodayKey()) return data.total;
+  } catch { /* corrupted — reset */ }
+  return 0;
+}
+
+function saveDailySales(total: number): void {
+  localStorage.setItem(
+    SALES_KEY,
+    JSON.stringify({ date: getTodayKey(), total }),
+  );
+}
 
 interface MenuItem {
   id: string;
@@ -34,6 +64,8 @@ function POSDashboard({ onCheckout }: POSDashboardProps) {
   const [activeCategory, setActiveCategory] = useState<string>('All');
   const [activeMenu, setActiveMenu] = useState<string>('pos');
   const [cart, setCart] = useState<CartItem[]>([]);
+  const [dailySales, setDailySales] = useState<number>(loadDailySales);
+  const [orders, setOrders] = useState<Order[]>(loadOrders);
 
   const filteredProducts = useMemo(() => {
     if (activeCategory === 'All') return PRODUCTS;
@@ -46,11 +78,6 @@ function POSDashboard({ onCheckout }: POSDashboardProps) {
   const tax = useMemo(() => calcTax(subtotal), [subtotal]);
   const total = subtotal + tax;
   const itemCount = useMemo(() => calcItemCount(cart), [cart]);
-
-  const dailySales = useMemo(() => {
-    // Simulated daily sales — in a real app this would come from a backend
-    return 284.50;
-  }, []);
 
   const addToCart = (product: (typeof PRODUCTS)[number]) => {
     setCart((prev) => {
@@ -85,6 +112,9 @@ function POSDashboard({ onCheckout }: POSDashboardProps) {
 
   const handleCheckout = () => {
     if (cart.length === 0) return;
+    const next = dailySales + total;
+    setDailySales(next);
+    saveDailySales(next);
     onCheckout(cart);
   };
 
@@ -92,7 +122,7 @@ function POSDashboard({ onCheckout }: POSDashboardProps) {
     <div className="pos-dashboard">
       {/* Top bar */}
       <header className="pos-topbar">
-        <h1 className="pos-title">M-Pro POS</h1>
+        <h1 className="pos-title">M-PRO CAFE</h1>
         <div className="pos-daily-sales">
           <span className="pos-daily-label">Today's Sales</span>
           <span className="pos-daily-value">
@@ -102,7 +132,7 @@ function POSDashboard({ onCheckout }: POSDashboardProps) {
       </header>
 
       {/* Main content: menu + catalog + cart */}
-      <div className="pos-main">
+      <div className={`pos-main ${activeMenu === 'settings' || activeMenu === 'orders' || activeMenu === 'customers' || activeMenu === 'reports' ? 'pos-main-settings' : ''}`}>
         {/* Left menu bar — icons collapsed, labels on hover */}
         <nav className="pos-menu" aria-label="Main navigation">
           <ul className="pos-menu-list">
@@ -131,133 +161,146 @@ function POSDashboard({ onCheckout }: POSDashboardProps) {
           </div>
         </nav>
 
-        {/* Product catalog */}
-        <section className="pos-catalog">
-          {/* Category tabs */}
-          <nav className="pos-categories" role="tablist" aria-label="Product categories">
-            {CATEGORIES.map((cat) => (
-              <button
-                key={cat}
-                role="tab"
-                aria-selected={activeCategory === cat}
-                className={`pos-cat-tab ${activeCategory === cat ? 'active' : ''}`}
-                onClick={() => setActiveCategory(cat)}
-              >
-                {cat}
-              </button>
-            ))}
-          </nav>
-
-          {/* Product grid */}
-          <div className="pos-product-grid">
-            {filteredProducts.length === 0 ? (
-              <div className="pos-empty-catalog">
-                <p>No products in this category.</p>
-              </div>
-            ) : (
-              filteredProducts.map((product) => (
-                <button
-                  key={product.id}
-                  className="pos-product-card"
-                  onClick={() => addToCart(product)}
-                >
-                  <span className="pos-product-emoji" aria-hidden="true">
-                    {product.emoji}
-                  </span>
-                  <span className="pos-product-name">{product.name}</span>
-                  <span className="pos-product-price">
-                    {formatCurrency(product.price)}
-                  </span>
-                </button>
-              ))
-            )}
-          </div>
-        </section>
-
-        {/* Cart sidebar */}
-        <aside className="pos-cart">
-          <div className="pos-cart-header">
-            <h2>Cart</h2>
-            {itemCount > 0 && (
-              <span className="pos-cart-count">{itemCount} item{itemCount !== 1 ? 's' : ''}</span>
-            )}
-          </div>
-
-          {cart.length === 0 ? (
-            <div className="pos-cart-empty">
-              <span className="pos-cart-empty-icon" aria-hidden="true">🛒</span>
-              <p>Your cart is empty</p>
-              <p className="pos-cart-hint">Tap a product to add it</p>
-            </div>
-          ) : (
-            <>
-              <ul className="pos-cart-items">
-                {cart.map((item) => (
-                  <li key={item.product.id} className="pos-cart-item">
-                    <span className="pos-cart-item-emoji" aria-hidden="true">
-                      {item.product.emoji}
-                    </span>
-                    <div className="pos-cart-item-info">
-                      <span className="pos-cart-item-name">
-                        {item.product.name}
-                      </span>
-                      <span className="pos-cart-item-price">
-                        {formatCurrency(item.product.price)}
-                      </span>
-                    </div>
-                    <div className="pos-cart-item-qty">
-                      <button
-                        className="pos-qty-btn"
-                        onClick={() => updateQuantity(item.product.id, -1)}
-                        aria-label={`Decrease quantity of ${item.product.name}`}
-                      >
-                        −
-                      </button>
-                      <span className="pos-qty-value">{item.quantity}</span>
-                      <button
-                        className="pos-qty-btn"
-                        onClick={() => updateQuantity(item.product.id, 1)}
-                        aria-label={`Increase quantity of ${item.product.name}`}
-                      >
-                        +
-                      </button>
-                    </div>
-                    <button
-                      className="pos-cart-remove"
-                      onClick={() => removeFromCart(item.product.id)}
-                      aria-label={`Remove ${item.product.name} from cart`}
-                    >
-                      ×
-                    </button>
-                  </li>
+        {/* Content area: settings, orders, or catalog + cart */}
+        {activeMenu === 'settings' ? (
+          <SettingsPanel />
+        ) : activeMenu === 'orders' ? (
+          <OrdersPanel orders={orders} onOrdersChange={setOrders} />
+        ) : activeMenu === 'customers' ? (
+          <CustomerManagement />
+        ) : activeMenu === 'reports' ? (
+          <ReportsPanel orders={orders} />
+        ) : (
+          <>
+            {/* Product catalog */}
+            <section className="pos-catalog">
+              {/* Category tabs */}
+              <nav className="pos-categories" role="tablist" aria-label="Product categories">
+                {CATEGORIES.map((cat) => (
+                  <button
+                    key={cat}
+                    role="tab"
+                    aria-selected={activeCategory === cat}
+                    className={`pos-cat-tab ${activeCategory === cat ? 'active' : ''}`}
+                    onClick={() => setActiveCategory(cat)}
+                  >
+                    {cat}
+                  </button>
                 ))}
-              </ul>
+              </nav>
 
-              <div className="pos-cart-totals">
-                <div className="pos-cart-row">
-                  <span>Subtotal</span>
-                  <span>{formatCurrency(subtotal)}</span>
-                </div>
-                <div className="pos-cart-row">
-                  <span>Tax (8%)</span>
-                  <span>{formatCurrency(tax)}</span>
-                </div>
-                <div className="pos-cart-row pos-cart-total">
-                  <span>Total</span>
-                  <span>{formatCurrency(total)}</span>
-                </div>
+              {/* Product grid */}
+              <div className="pos-product-grid">
+                {filteredProducts.length === 0 ? (
+                  <div className="pos-empty-catalog">
+                    <p>No products in this category.</p>
+                  </div>
+                ) : (
+                  filteredProducts.map((product) => (
+                    <button
+                      key={product.id}
+                      className="pos-product-card"
+                      onClick={() => addToCart(product)}
+                    >
+                      <span className="pos-product-emoji" aria-hidden="true">
+                        {product.emoji}
+                      </span>
+                      <span className="pos-product-name">{product.name}</span>
+                      <span className="pos-product-price">
+                        {formatCurrency(product.price)}
+                      </span>
+                    </button>
+                  ))
+                )}
+              </div>
+            </section>
+
+            {/* Cart sidebar */}
+            <aside className="pos-cart">
+              <div className="pos-cart-header">
+                <h2>Cart</h2>
+                {itemCount > 0 && (
+                  <span className="pos-cart-count">{itemCount} item{itemCount !== 1 ? 's' : ''}</span>
+                )}
               </div>
 
-              <button
-                className="pos-checkout-btn"
-                onClick={handleCheckout}
-                disabled={cart.length === 0}
-              >
-                Checkout — {formatCurrency(total)}
-              </button>
-            </>
-          )}
-        </aside>
+              {cart.length === 0 ? (
+                <div className="pos-cart-empty">
+                  <span className="pos-cart-empty-icon" aria-hidden="true">🛒</span>
+                  <p>Your cart is empty</p>
+                  <p className="pos-cart-hint">Tap a product to add it</p>
+                </div>
+              ) : (
+                <>
+                  <ul className="pos-cart-items">
+                    {cart.map((item) => (
+                      <li key={item.product.id} className="pos-cart-item">
+                        <span className="pos-cart-item-emoji" aria-hidden="true">
+                          {item.product.emoji}
+                        </span>
+                        <div className="pos-cart-item-info">
+                          <span className="pos-cart-item-name">
+                            {item.product.name}
+                          </span>
+                          <span className="pos-cart-item-price">
+                            {formatCurrency(item.product.price)}
+                          </span>
+                        </div>
+                        <div className="pos-cart-item-qty">
+                          <button
+                            className="pos-qty-btn"
+                            onClick={() => updateQuantity(item.product.id, -1)}
+                            aria-label={`Decrease quantity of ${item.product.name}`}
+                          >
+                            −
+                          </button>
+                          <span className="pos-qty-value">{item.quantity}</span>
+                          <button
+                            className="pos-qty-btn"
+                            onClick={() => updateQuantity(item.product.id, 1)}
+                            aria-label={`Increase quantity of ${item.product.name}`}
+                          >
+                            +
+                          </button>
+                        </div>
+                        <button
+                          className="pos-cart-remove"
+                          onClick={() => removeFromCart(item.product.id)}
+                          aria-label={`Remove ${item.product.name} from cart`}
+                        >
+                          ×
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+
+                  <div className="pos-cart-totals">
+                    <div className="pos-cart-row">
+                      <span>Subtotal</span>
+                      <span>{formatCurrency(subtotal)}</span>
+                    </div>
+                    <div className="pos-cart-row">
+                      <span>Tax (8%)</span>
+                      <span>{formatCurrency(tax)}</span>
+                    </div>
+                    <div className="pos-cart-row pos-cart-total">
+                      <span>Total</span>
+                      <span>{formatCurrency(total)}</span>
+                    </div>
+                  </div>
+
+                  <button
+                    className="pos-checkout-btn"
+                    onClick={handleCheckout}
+                    disabled={cart.length === 0}
+                  >
+                    Checkout — {formatCurrency(total)}
+                  </button>
+                </>
+              )}
+            </aside>
+          </>
+        )}
       </div>
     </div>
   );

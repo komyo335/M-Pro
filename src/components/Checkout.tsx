@@ -7,7 +7,11 @@ import {
   calcItemCount,
   formatCurrency,
   TAX_RATE,
+  createOrder,
+  saveOrder,
 } from '../data/products';
+import { updateCustomerFromOrder } from '../data/customers';
+import { useSettings } from '../contexts/useSettings';
 import './Checkout.css';
 
 interface CheckoutProps {
@@ -20,9 +24,28 @@ interface CheckoutProps {
 }
 
 function Checkout({ cart, onBack, onOrderComplete }: CheckoutProps) {
+  const { settings } = useSettings();
+  const { paymentMethods: enabledPayments } = settings;
+
   const [paymentMethod, setPaymentMethod] = useState<string>('cash');
   const [isProcessing, setIsProcessing] = useState(false);
   const [isConfirmed, setIsConfirmed] = useState(false);
+
+  // Build available payment options from settings
+  const ALL_PAYMENT_OPTIONS = [
+    ['cash', '💵', 'Cash'],
+    ['card', '💳', 'Card'],
+    ['mobile', '📱', 'Mobile Pay'],
+  ] as const;
+
+  const availablePayments = ALL_PAYMENT_OPTIONS.filter(
+    ([key]) => enabledPayments[key],
+  );
+
+  // If current selection is disabled, fall back to first available
+  const effectiveMethod = availablePayments.some(([k]) => k === paymentMethod)
+    ? paymentMethod
+    : availablePayments[0]?.[0] ?? 'cash';
 
   // ── Calculations ──────────────────────────────────
   const subtotal = useMemo(() => calcSubtotal(cart), [cart]);
@@ -44,8 +67,11 @@ function Checkout({ cart, onBack, onOrderComplete }: CheckoutProps) {
   const handleConfirm = () => {
     if (cart.length === 0) return;
     setIsProcessing(true);
-    // Simulate payment processing
+    // Simulate payment processing, then persist the order
     setTimeout(() => {
+      const order = createOrder(cart, subtotal, tax, total, effectiveMethod);
+      saveOrder(order);
+      updateCustomerFromOrder(order);
       setIsProcessing(false);
       setIsConfirmed(true);
     }, 1200);
@@ -67,9 +93,9 @@ function Checkout({ cart, onBack, onOrderComplete }: CheckoutProps) {
             <h2>Order Confirmed!</h2>
             <p className="checkout-confirm-total">
               {formatCurrency(total)} paid via{' '}
-              {paymentMethod === 'cash'
+              {effectiveMethod === 'cash'
                 ? 'Cash'
-                : paymentMethod === 'card'
+                : effectiveMethod === 'card'
                   ? 'Card'
                   : 'Mobile Pay'}
             </p>
@@ -218,20 +244,20 @@ function Checkout({ cart, onBack, onOrderComplete }: CheckoutProps) {
         <div className="checkout-payment">
           <label className="checkout-payment-label">Payment method</label>
           <div className="checkout-payment-options">
-            {([
-              ['cash', '💵', 'Cash'],
-              ['card', '💳', 'Card'],
-              ['mobile', '📱', 'Mobile Pay'],
-            ] as const).map(([value, emoji, label]) => (
-              <button
-                key={value}
-                className={`checkout-payment-option ${paymentMethod === value ? 'active' : ''}`}
-                onClick={() => setPaymentMethod(value)}
-              >
-                <span aria-hidden="true">{emoji}</span>
-                <span>{label}</span>
-              </button>
-            ))}
+            {availablePayments.length === 0 ? (
+              <p className="checkout-no-payments">No payment methods enabled</p>
+            ) : (
+              availablePayments.map(([value, emoji, label]) => (
+                <button
+                  key={value}
+                  className={`checkout-payment-option ${paymentMethod === value ? 'active' : ''}`}
+                  onClick={() => setPaymentMethod(value)}
+                >
+                  <span aria-hidden="true">{emoji}</span>
+                  <span>{label}</span>
+                </button>
+              ))
+            )}
           </div>
         </div>
 

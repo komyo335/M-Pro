@@ -62,9 +62,9 @@ function LoginForm({ onLogin }: { onLogin: () => void }) {
     <div className="login-card">
       <div className="login-header">
         <div className="login-logo">
-          <img src={logo} alt="M-Pro logo" />
+          <img src={logo} alt="M-PRO CAFE logo" />
         </div>
-        <h1>Welcome from M-Pro</h1>
+        <h1>Welcome to M-PRO CAFE</h1>
         <p>Enter your credentials to continue</p>
       </div>
 

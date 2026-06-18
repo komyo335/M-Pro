@@ -1,0 +1,298 @@
+/* ============================================
+   Customer Management — layout & theming
+   Uses design tokens from src/index.css
+   ============================================ */
+
+.customer-mgmt {
+  flex: 1;
+  overflow-y: auto;
+  padding: 24px 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* ---- Header ---- */
+.customer-header h2 {
+  margin: 0 0 4px;
+  font-size: 22px;
+}
+
+.customer-subtitle {
+  margin: 0;
+  font-size: 14px;
+  color: var(--text);
+}
+
+/* ---- Demographic Tabs ---- */
+.customer-tabs {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.customer-tab {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  font-size: 13px;
+  font-family: var(--sans);
+  font-weight: 500;
+  color: var(--text);
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s, box-shadow 0.15s;
+}
+
+.customer-tab:hover {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
+}
+
+.customer-tab.active {
+  border-color: #3b82f6;
+  background: rgba(59, 130, 246, 0.06);
+  color: #3b82f6;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.12);
+}
+
+.customer-tab:focus-visible {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+}
+
+.customer-tab-icon {
+  font-size: 16px;
+  line-height: 1;
+}
+
+.customer-tab-label {
+  font-size: 13px;
+}
+
+.customer-tab-count {
+  font-size: 11px;
+  color: var(--text);
+  background: var(--code-bg);
+  border-radius: 10px;
+  padding: 1px 8px;
+  min-width: 20px;
+  text-align: center;
+}
+
+.customer-tab.active .customer-tab-count {
+  background: rgba(59, 130, 246, 0.12);
+  color: #3b82f6;
+}
+
+/* ---- Content area ---- */
+.customer-content {
+  display: flex;
+  gap: 24px;
+  flex: 1;
+  min-height: 0;
+}
+
+/* ---- Customer list ---- */
+.customer-list {
+  flex: 1;
+  min-width: 0;
+}
+
+.customer-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 48px 16px;
+  color: var(--text);
+}
+
+.customer-empty-icon {
+  font-size: 36px;
+}
+
+.customer-empty p {
+  font-size: 14px;
+}
+
+/* ---- Customer grid ---- */
+.customer-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 10px;
+}
+
+.customer-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 16px 12px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  cursor: pointer;
+  transition: border-color 0.15s, box-shadow 0.15s, background 0.15s;
+  text-align: center;
+  font-family: var(--sans);
+}
+
+.customer-card:hover {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
+}
+
+.customer-card.selected {
+  border-color: #3b82f6;
+  background: rgba(59, 130, 246, 0.06);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.12);
+}
+
+.customer-card:focus-visible {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+}
+
+.customer-card-emoji {
+  font-size: 32px;
+  line-height: 1;
+}
+
+.customer-card-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-h);
+}
+
+.customer-card-visits {
+  font-size: 12px;
+  color: var(--text);
+}
+
+.customer-card-total {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-h);
+}
+
+/* ---- Customer detail panel ---- */
+.customer-detail {
+  width: 280px;
+  flex-shrink: 0;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  align-self: flex-start;
+  position: sticky;
+  top: 0;
+}
+
+.customer-detail-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.customer-detail-emoji {
+  font-size: 36px;
+  line-height: 1;
+}
+
+.customer-detail-header h3 {
+  flex: 1;
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--text-h);
+}
+
+.customer-detail-close {
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  color: var(--text);
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+  line-height: 1;
+  padding: 0;
+}
+
+.customer-detail-close:hover {
+  background: var(--code-bg);
+  border-color: var(--text);
+}
+
+.customer-detail-close:focus-visible {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+}
+
+.customer-detail-body {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.customer-detail-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.customer-detail-row:last-child {
+  border-bottom: none;
+}
+
+.customer-detail-label {
+  font-size: 13px;
+  color: var(--text);
+}
+
+.customer-detail-value {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-h);
+}
+
+.customer-segment {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* ---- Responsive ---- */
+@media (max-width: 768px) {
+  .customer-mgmt {
+    padding: 16px;
+  }
+
+  .customer-content {
+    flex-direction: column;
+  }
+
+  .customer-detail {
+    width: 100%;
+    position: static;
+  }
+
+  .customer-grid {
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  }
+}

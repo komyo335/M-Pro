@@ -1,12 +1,13 @@
 import { useState } from 'react';
 import type { CartItem } from './data/products';
+import { SettingsProvider } from './contexts/SettingsContext';
 import LoginForm from './components/LoginForm';
 import POSDashboard from './components/POSDashboard';
 import Checkout from './components/Checkout';
 
 type View = 'dashboard' | 'checkout';
 
-function App() {
+function AppContent() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [view, setView] = useState<View>('dashboard');
   const [checkoutCart, setCheckoutCart] = useState<CartItem[]>([]);
@@ -40,6 +41,14 @@ function App() {
   }
 
   return <POSDashboard onCheckout={handleCheckout} />;
+}
+
+function App() {
+  return (
+    <SettingsProvider>
+      <AppContent />
+    </SettingsProvider>
+  );
 }
 
 export default App;

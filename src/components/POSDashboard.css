@@ -14,9 +14,28 @@
 }
 
 .pos-title {
-  font-size: 22px;
+  font-size: 24px;
+  font-weight: 600;
   margin: 0;
-  letter-spacing: -0.3px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  background: linear-gradient(135deg, var(--text-h) 0%, var(--accent) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  position: relative;
+}
+
+/* Subtle underline accent */
+.pos-title::after {
+  content: '';
+  position: absolute;
+  bottom: -4px;
+  left: 0;
+  width: 40px;
+  height: 3px;
+  background: var(--accent);
+  border-radius: 2px;
 }
 
 .pos-daily-sales {
@@ -49,10 +68,21 @@
   transition: grid-template-columns 0.25s ease;
 }
 
+/* Settings view: no cart column */
+.pos-main-settings {
+  grid-template-columns: 64px 1fr;
+}
+
 /* Hover: menu column expands, pushes catalog + cart right */
 .pos-main:has(.pos-menu:hover),
 .pos-main:has(.pos-menu:focus-within) {
   grid-template-columns: 180px 1fr 320px;
+}
+
+/* Settings mode: no third column, hover expand adjusts */
+.pos-main-settings:has(.pos-menu:hover),
+.pos-main-settings:has(.pos-menu:focus-within) {
+  grid-template-columns: 180px 1fr;
 }
 
 /* ---- Left menu bar — icons collapsed, slides open on hover ---- */
@@ -508,6 +538,12 @@
   /* Keep menu collapsed on mobile — no push */
   .pos-main:has(.pos-menu:hover),
   .pos-main:has(.pos-menu:focus-within) {
+    grid-template-columns: 48px 1fr;
+  }
+
+  .pos-main-settings,
+  .pos-main-settings:has(.pos-menu:hover),
+  .pos-main-settings:has(.pos-menu:focus-within) {
     grid-template-columns: 48px 1fr;
   }
 

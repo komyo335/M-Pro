@@ -9,9 +9,11 @@ import {
   formatCurrency,
   loadOrders,
 } from '../data/products';
+import { loadStaff } from '../data/staff';
 import SettingsPanel from './SettingsPanel';
 import OrdersPanel from './OrdersPanel';
 import CustomerManagement from './CustomerManagement';
+import StaffManagement from './StaffManagement';
 import ReportsPanel from './ReportsPanel';
 import './POSDashboard.css';
 
@@ -66,6 +68,17 @@ function POSDashboard({ onCheckout }: POSDashboardProps) {
   const [cart, setCart] = useState<CartItem[]>([]);
   const [dailySales, setDailySales] = useState<number>(loadDailySales);
   const [orders, setOrders] = useState<Order[]>(loadOrders);
+  const [staff, setStaff] = useState(loadStaff);
+
+  // Reload staff whenever a re-render picks up localStorage changes
+  useEffect(() => {
+    setStaff(loadStaff());
+  }, []);
+
+  const activeStaff = useMemo(
+    () => staff.find((s) => s.status === 'active') ?? staff[0] ?? null,
+    [staff],
+  );
 
   const filteredProducts = useMemo(() => {
     if (activeCategory === 'All') return PRODUCTS;
@@ -132,7 +145,7 @@ function POSDashboard({ onCheckout }: POSDashboardProps) {
       </header>
 
       {/* Main content: menu + catalog + cart */}
-      <div className={`pos-main ${activeMenu === 'settings' || activeMenu === 'orders' || activeMenu === 'customers' || activeMenu === 'reports' ? 'pos-main-settings' : ''}`}>
+      <div className={`pos-main ${activeMenu === 'settings' || activeMenu === 'orders' || activeMenu === 'customers' || activeMenu === 'staff' || activeMenu === 'reports' ? 'pos-main-settings' : ''}`}>
         {/* Left menu bar — icons collapsed, labels on hover */}
         <nav className="pos-menu" aria-label="Main navigation">
           <ul className="pos-menu-list">
@@ -154,10 +167,19 @@ function POSDashboard({ onCheckout }: POSDashboardProps) {
           </ul>
 
           <div className="pos-menu-footer">
-            <div className="pos-menu-user" title="Staff">
-              <span className="pos-menu-avatar" aria-hidden="true">👤</span>
-              <span className="pos-menu-label">Staff</span>
-            </div>
+            {activeStaff && (
+              <button
+                className={`pos-menu-user ${activeMenu === 'staff' ? 'active' : ''}`}
+                title={activeStaff.name}
+                onClick={() =>
+                  setActiveMenu(activeMenu === 'staff' ? 'pos' : 'staff')
+                }
+              >
+                <span className="pos-menu-avatar" aria-hidden="true">{activeStaff.emoji}</span>
+                <span className="pos-menu-label">{activeStaff.name}</span>
+                <span className={`pos-menu-status pos-menu-status--${activeStaff.status}`} />
+              </button>
+            )}
           </div>
         </nav>
 
@@ -168,6 +190,8 @@ function POSDashboard({ onCheckout }: POSDashboardProps) {
           <OrdersPanel orders={orders} onOrdersChange={setOrders} />
         ) : activeMenu === 'customers' ? (
           <CustomerManagement />
+        ) : activeMenu === 'staff' ? (
+          <StaffManagement />
         ) : activeMenu === 'reports' ? (
           <ReportsPanel orders={orders} />
         ) : (

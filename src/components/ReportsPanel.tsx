@@ -1,127 +1,20 @@
 import { useState, useMemo } from 'react';
 import type { Order, CustomerType } from '../data/products';
-import { PRODUCTS, CUSTOMER_TYPES, formatCurrency, TAX_RATE } from '../data/products';
-import { loadCustomers, DEMOGRAPHICS  } from '../data/customers';
-import type { CustomerDemographic } from '../data/products';
+import { formatCurrency, TAX_RATE } from '../data/products';
+import {
+  type ReportPeriod,
+  PERIODS,
+  formatDate,
+  toTime,
+  isToday,
+  paymentLabel,
+  customerTypeLabel,
+  demographicLabel,
+  CATEGORY_EMOJIS,
+  CATEGORY_LABELS,
+  useReportData,
+} from '../data/reports';
 import './ReportsPanel.css';
-
-/* ── Daily-sales persistence (same key as POSDashboard) ───── */
-
-const SALES_KEY = 'mpro_daily_sales';
-
-function getTodayKey(): string {
-  const d = new Date();
-  return `${d.getFullYear()}-${d.getMonth() + 1}-${d.getDate()}`;
-}
-
-function loadDailySales(): { date: string; total: number } | null {
-  try {
-    const raw = localStorage.getItem(SALES_KEY);
-    if (!raw) return null;
-    const data = JSON.parse(raw);
-    return data;
-  } catch {
-    return null;
-  }
-}
-
-/* ── Helpers ─────────────────────────────────────────────── */
-
-function formatDate(iso: string): string {
-  const d = new Date(iso);
-  return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-}
-
-function toTime(iso: string): string {
-  const d = new Date(iso);
-  const pad = (n: number) => String(n).padStart(2, '0');
-  return `${pad(d.getHours())}:${pad(d.getMinutes())}`;
-}
-
-function paymentLabel(method: string): string {
-  switch (method) {
-    case 'cash': return 'Cash';
-    case 'card': return 'Card';
-    case 'mobile': return 'Mobile Pay';
-    case 'manual': return 'Manual';
-    default: return method;
-  }
-}
-
-function customerTypeLabel(type: CustomerType | undefined): string {
-  const found = CUSTOMER_TYPES.find((ct) => ct.value === type);
-  return found ? `${found.emoji} ${found.label}` : '';
-}
-
-function demographicLabel(demo: CustomerDemographic | undefined): string {
-  if (!demo) return '';
-  const found = DEMOGRAPHICS.find((d) => d.value === demo);
-  return found ? `${found.icon} ${found.label}` : '';
-}
-
-function isToday(iso: string): boolean {
-  return iso.slice(0, 10) === getTodayKey();
-}
-
-function isYesterday(iso: string): boolean {
-  const d = new Date();
-  d.setDate(d.getDate() - 1);
-  const yKey = `${d.getFullYear()}-${d.getMonth() + 1}-${d.getDate()}`;
-  return iso.slice(0, 10) === yKey;
-}
-
-function isThisWeek(iso: string): boolean {
-  const now = new Date();
-  const d = new Date(iso);
-  const startOfWeek = new Date(now);
-  startOfWeek.setDate(now.getDate() - now.getDay());
-  startOfWeek.setHours(0, 0, 0, 0);
-  return d >= startOfWeek;
-}
-
-function isThisMonth(iso: string): boolean {
-  const now = new Date();
-  const d = new Date(iso);
-  return d.getFullYear() === now.getFullYear() && d.getMonth() === now.getMonth();
-}
-
-/* ── Report period types ─────────────────────────────────── */
-
-type ReportPeriod = 'today' | 'yesterday' | 'week' | 'month' | 'all';
-
-const PERIODS: { value: ReportPeriod; label: string }[] = [
-  { value: 'today', label: 'Today' },
-  { value: 'yesterday', label: 'Yesterday' },
-  { value: 'week', label: 'This Week' },
-  { value: 'month', label: 'This Month' },
-  { value: 'all', label: 'All Time' },
-];
-
-function periodFilter(period: ReportPeriod): (iso: string) => boolean {
-  switch (period) {
-    case 'today': return isToday;
-    case 'yesterday': return isYesterday;
-    case 'week': return isThisWeek;
-    case 'month': return isThisMonth;
-    default: return () => true;
-  }
-}
-
-/* ── Category display maps ───────────────────────────────── */
-
-const CATEGORY_LABELS: Record<string, string> = {
-  drinks: 'Drinks',
-  food: 'Food',
-  snacks: 'Snacks',
-  merch: 'Merch',
-};
-
-const CATEGORY_EMOJIS: Record<string, string> = {
-  drinks: '🥤',
-  food: '🍽️',
-  snacks: '🍪',
-  merch: '👕',
-};
 
 /* ── Component ───────────────────────────────────────────── */
 
@@ -132,154 +25,17 @@ interface ReportsPanelProps {
 function ReportsPanel({ orders }: ReportsPanelProps) {
   const [activePeriod, setActivePeriod] = useState<ReportPeriod>('today');
 
-  /* ── Daily sales income (from POSDashboard's localStorage key) ── */
-  const dailySalesData = useMemo(() => loadDailySales(), []);
+  /* ── All report data computed by the shared data module ── */
+  const { orderMetrics: metrics, customerMetrics, catalogStats, dailySales: dailySalesData } =
+    useReportData(orders, activePeriod);
+
   const dailySalesTotal = dailySalesData?.total ?? 0;
-
-  /* ── Filter orders by period ──────────────────────── */
-  const filteredOrders = useMemo(() => {
-    const filter = periodFilter(activePeriod);
-    return orders.filter((o) => filter(o.createdAt));
-  }, [orders, activePeriod]);
-
-  /* ── Aggregate all metrics from filtered orders ────── */
-  const metrics = useMemo(() => {
-    const ords = filteredOrders;
-
-    const totalRevenue = ords.reduce((sum, o) => sum + o.total, 0);
-    const totalTax = ords.reduce((sum, o) => sum + o.tax, 0);
-    const totalSubtotal = ords.reduce((sum, o) => sum + o.subtotal, 0);
-    const orderCount = ords.length;
-
-    const avgOrderValue = orderCount > 0 ? totalRevenue / orderCount : 0;
-
-    const totalItems = ords.reduce(
-      (sum, o) => sum + o.items.reduce((s, i) => s + i.quantity, 0),
-      0,
-    );
-
-    // Revenue by payment method
-    const byPayment: Record<string, number> = {};
-    for (const o of ords) {
-      const key = o.paymentMethod || 'unknown';
-      byPayment[key] = (byPayment[key] || 0) + o.total;
-    }
-
-    // Revenue by product category
-    const byCategory: Record<string, number> = {};
-    for (const o of ords) {
-      for (const item of o.items) {
-        const cat = item.product.category;
-        byCategory[cat] = (byCategory[cat] || 0) + item.product.price * item.quantity;
-      }
-    }
-
-    // Revenue by customer type
-    const byCustomerType: Record<string, number> = {};
-    for (const o of ords) {
-      const ct = o.customerType || 'walk-in';
-      byCustomerType[ct] = (byCustomerType[ct] || 0) + o.total;
-    }
-
-    // Top products by revenue + quantity
-    const productRevenue: Record<string, { revenue: number; qty: number; name: string; emoji: string }> = {};
-    for (const o of ords) {
-      for (const item of o.items) {
-        const pid = item.product.id;
-        if (!productRevenue[pid]) {
-          productRevenue[pid] = {
-            revenue: 0,
-            qty: 0,
-            name: item.product.name,
-            emoji: item.product.emoji,
-          };
-        }
-        productRevenue[pid].revenue += item.product.price * item.quantity;
-        productRevenue[pid].qty += item.quantity;
-      }
-    }
-    const topByRevenue = Object.values(productRevenue)
-      .sort((a, b) => b.revenue - a.revenue)
-      .slice(0, 10);
-    const topByQuantity = Object.values(productRevenue)
-      .sort((a, b) => b.qty - a.qty)
-      .slice(0, 10);
-
-    // Time-of-day heat: group by hour
-    const byHour: Record<number, { orders: number; revenue: number }> = {};
-    for (const o of ords) {
-      const hour = new Date(o.createdAt).getHours();
-      if (!byHour[hour]) byHour[hour] = { orders: 0, revenue: 0 };
-      byHour[hour].orders += 1;
-      byHour[hour].revenue += o.total;
-    }
-
-    return {
-      totalRevenue,
-      totalTax,
-      totalSubtotal,
-      orderCount,
-      avgOrderValue,
-      totalItems,
-      byPayment,
-      byCategory,
-      byCustomerType,
-      topByRevenue,
-      topByQuantity,
-      byHour,
-    };
-  }, [filteredOrders]);
-
-  /* ── Customer aggregate metrics (all-time) ─────────── */
-  const customerMetrics = useMemo(() => {
-    const allCustomers = loadCustomers();
-    const totalCustomers = allCustomers.length;
-    const totalCustomerSpent = allCustomers.reduce((sum, c) => sum + c.totalSpent, 0);
-    const totalCustomerVisits = allCustomers.reduce((sum, c) => sum + c.visits, 0);
-    const avgPerVisit = totalCustomerVisits > 0 ? totalCustomerSpent / totalCustomerVisits : 0;
-
-    const byDemographic: Record<string, { spent: number; visits: number; count: number; emoji: string }> = {};
-    for (const demo of DEMOGRAPHICS) {
-      if (demo.value !== 'all') {
-        const customers = allCustomers.filter((c) => c.demographic === demo.value);
-        byDemographic[demo.value] = {
-          spent: customers.reduce((sum, c) => sum + c.totalSpent, 0),
-          visits: customers.reduce((sum, c) => sum + c.visits, 0),
-          count: customers.length,
-          emoji: demo.icon,
-        };
-      }
-    }
-
-    const topCustomers = [...allCustomers]
-      .sort((a, b) => b.totalSpent - a.totalSpent)
-      .slice(0, 10);
-
-    return { totalCustomers, totalCustomerSpent, totalCustomerVisits, avgPerVisit, byDemographic, topCustomers };
-  }, []);
-
-  /* ── Product catalog stats ─────────────────────────── */
-  const catalogStats = useMemo(() => {
-    const byCategory: Record<string, { count: number; minPrice: number; maxPrice: number; total: number }> = {};
-    for (const p of PRODUCTS) {
-      if (!byCategory[p.category]) {
-        byCategory[p.category] = { count: 0, minPrice: Infinity, maxPrice: -Infinity, total: 0 };
-      }
-      const s = byCategory[p.category];
-      s.count += 1;
-      s.total += p.price;
-      if (p.price < s.minPrice) s.minPrice = p.price;
-      if (p.price > s.maxPrice) s.maxPrice = p.price;
-    }
-    return { totalProducts: PRODUCTS.length, byCategory };
-  }, []);
 
   /* ── All-time order aggregates for income reconciliation ── */
   const allTimeMetrics = useMemo(() => {
     const todayFilter = isToday;
     const todayOrders = orders.filter((o) => todayFilter(o.createdAt));
-    const todayOrderRevenue = todayOrders.reduce((sum, o) => sum + o.total, 0);
-    return { todayOrderRevenue, todayOrderCount: todayOrders.length };
+    return { todayOrderRevenue: todayOrders.reduce((sum, o) => sum + o.total, 0), todayOrderCount: todayOrders.length };
   }, [orders]);
 
   /* ── Max values for percentage bars ────────────────── */
@@ -721,12 +477,12 @@ function ReportsPanel({ orders }: ReportsPanelProps) {
       {/* ── Orders table ───────────────────────────────── */}
       <section className="reports-section">
         <h3 className="reports-section-title">
-          📋 {activePeriod === 'all' ? 'All' : activePeriod === 'today' ? "Today's" : activePeriod === 'yesterday' ? "Yesterday's" : 'Period'} Orders
+          {activePeriod === 'all' ? 'All' : activePeriod === 'today' ? "Today's" : activePeriod === 'yesterday' ? "Yesterday's" : 'Period'} Orders
           <span className="reports-section-count">
-            {filteredOrders.length} order{filteredOrders.length !== 1 ? 's' : ''}
+            {metrics.orderCount} order{metrics.orderCount !== 1 ? 's' : ''}
           </span>
         </h3>
-        {filteredOrders.length === 0 ? (
+        {metrics.orderCount === 0 ? (
           <div className="reports-empty">
             <span className="reports-empty-icon" aria-hidden="true">📋</span>
             <p>No orders in this period.</p>
@@ -750,7 +506,7 @@ function ReportsPanel({ orders }: ReportsPanelProps) {
                 </tr>
               </thead>
               <tbody>
-                {filteredOrders.slice(0, 50).map((order) => (
+                {metrics.orders.slice(0, 50).map((order) => (
                   <tr key={order.id}>
                     <td className="reports-order-id">{order.id}</td>
                     <td>{formatDate(order.createdAt)}</td>
@@ -771,9 +527,9 @@ function ReportsPanel({ orders }: ReportsPanelProps) {
                 ))}
               </tbody>
             </table>
-            {filteredOrders.length > 50 && (
+            {metrics.orderCount > 50 && (
               <p className="reports-table-note">
-                Showing 50 of {filteredOrders.length} orders.
+                Showing 50 of {metrics.orderCount} orders.
               </p>
             )}
           </div>

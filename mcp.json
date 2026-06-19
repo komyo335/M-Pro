@@ -1,0 +1,23 @@
+{
+  "mcpServers": {
+    "context-awesome": {
+      "type": "http",
+      "url": "https://www.context-awesome.com/api/mcp"
+    },
+    "context7": {
+      "type": "stdio",
+      "command": "npx",
+      "args": [
+        "-y",
+        "@upstash/context7-mcp@latest"
+      ],
+      "env": {}
+    },
+    "magic": {
+      "type": "stdio",
+      "command": "magic",
+      "args": [],
+      "env": {}
+    }
+  }
+}

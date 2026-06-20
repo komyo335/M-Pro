@@ -7,27 +7,30 @@ auto-advance: 20
 ---
 
 <!-- slide 1 -->
-
-It's a POS for Coffee and Snack Cafe,it mainly  for  employee and  staff of that Cafe. 
+#Who's my person?
+## It's a POS for Coffee and Snack Cafe,it mainly  for  employee and  staff of that Cafe. 
 <!-- 20s -->
 
 ---
 
 <!-- slide 2 -->
 # Their problem
-It may solve the problem for making  record, order , daily income,customer types  of that's cafe and it can also make a report for all of this.
+## It may solve the problem for making  record, order , daily income,customer types  of that's cafe and it can also make a report for all of this.
 
 ---
 
 <!-- slide 3 -->
 # What I built
-I built a POS System for a small Coffee and Snack Cafe. All record of income,order and customer are included.
+## I built a POS System for a small Coffee and Snack Cafe. All record of income,order and customer are included.
 
 ---
 
 <!-- slide 4 -->
 # How I built it
-- MCP: …Context7, Magic, context-awesome
+- MCP: 
+	Context7,
+        Magic,
+        Context-awesome
 - Skill: 
      M-Pro
      code-reviewer 
@@ -40,7 +43,7 @@ I built a POS System for a small Coffee and Snack Cafe. All record of income,ord
      review-branch 
   ❯  tester
 - Agent:
-	 m-pro-feature-builder,
+        m-pro-feature-builder,
 	mcp-data-implementer,
 	ui-builder
 
@@ -52,6 +55,7 @@ It's is a small mini apps and it can make record of income, food order, customer
 
 <!-- slide 6 -->
 # Done checklist
-- [Done] repo public
-- [Done ] MCP + skill + agent used
-- [Done ] report.md in team repo
+- [x] repo public
+- [x] MCP + skill + agent used
+- [x] report.md in team repo
+

@@ -396,6 +396,262 @@
   line-height: 1.5;
 }
 
+/* ---- Add User Section ---- */
+.staff-add-section {
+  display: flex;
+  justify-content: center;
+}
+
+.staff-add-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 14px 28px;
+  font-size: 16px;
+  font-weight: 600;
+  font-family: var(--sans);
+  color: #fff;
+  background: linear-gradient(135deg, #3b82f6, #2563eb);
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: transform 0.15s, box-shadow 0.15s, background 0.15s;
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
+}
+
+.staff-add-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 14px rgba(59, 130, 246, 0.4);
+  background: linear-gradient(135deg, #2563eb, #1d4ed8);
+}
+
+.staff-add-btn:active {
+  transform: translateY(0);
+}
+
+.staff-add-btn:focus-visible {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+}
+
+.staff-add-btn-icon {
+  font-size: 18px;
+  line-height: 1;
+}
+
+/* ---- Add User Form ---- */
+.staff-add-form {
+  width: 100%;
+  max-width: 600px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+}
+
+.staff-add-form h3 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--text-h);
+}
+
+.staff-form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+.staff-form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.staff-form-field label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.staff-form-field input,
+.staff-form-field select {
+  padding: 10px 12px;
+  font-size: 14px;
+  font-family: var(--sans);
+  color: var(--text-h);
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.staff-form-field input:focus,
+.staff-form-field select:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.12);
+}
+
+.staff-form-field input::placeholder {
+  color: var(--text);
+  opacity: 0.6;
+}
+
+.staff-form-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+}
+
+.staff-form-submit {
+  padding: 10px 22px;
+  font-size: 14px;
+  font-weight: 600;
+  font-family: var(--sans);
+  color: #fff;
+  background: #10b981;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.15s, transform 0.15s;
+}
+
+.staff-form-submit:hover {
+  background: #059669;
+  transform: translateY(-1px);
+}
+
+.staff-form-cancel {
+  padding: 10px 22px;
+  font-size: 14px;
+  font-weight: 500;
+  font-family: var(--sans);
+  color: var(--text);
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.staff-form-cancel:hover {
+  background: var(--code-bg);
+  border-color: var(--text);
+}
+
+.staff-form-submit:focus-visible,
+.staff-form-cancel:focus-visible {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+}
+
+/* ---- Form error ---- */
+.staff-form-error {
+  font-size: 13px;
+  color: #ef4444;
+  margin: 0;
+  padding: 6px 10px;
+  background: rgba(239, 68, 68, 0.08);
+  border-radius: 6px;
+}
+
+/* ---- Admin list section ---- */
+.staff-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.staff-list-title {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-h);
+}
+
+.staff-list-empty {
+  font-size: 14px;
+  color: var(--text);
+  padding: 24px 0;
+  text-align: center;
+}
+
+.staff-list-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 10px;
+}
+
+/* ---- Admin card (list variant) ---- */
+.staff-card-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.staff-card-info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.staff-card-delete {
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  color: #ef4444;
+  background: transparent;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  flex-shrink: 0;
+  padding: 0;
+  transition: background 0.15s;
+  line-height: 1;
+}
+
+.staff-card-delete:hover {
+  background: rgba(239, 68, 68, 0.1);
+}
+
+.staff-card-delete:focus-visible {
+  outline: 2px solid #ef4444;
+  outline-offset: 1px;
+}
+
+.staff-card-details {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid var(--border);
+}
+
+.staff-card-detail {
+  font-size: 12px;
+  color: var(--text);
+  background: var(--code-bg);
+  padding: 2px 8px;
+  border-radius: 4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
 /* ---- Responsive ---- */
 @media (max-width: 768px) {
   .staff-mgmt {
@@ -417,5 +673,18 @@
 
   .staff-stats {
     grid-template-columns: repeat(2, 1fr);
+  }
+
+  .staff-form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .staff-form-actions {
+    flex-direction: column;
+  }
+
+  .staff-form-submit,
+  .staff-form-cancel {
+    width: 100%;
   }
 }

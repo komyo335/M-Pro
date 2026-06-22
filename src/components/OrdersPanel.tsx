@@ -183,6 +183,15 @@ function OrdersPanel({ orders, onOrdersChange }: OrdersPanelProps) {
     setForm(EMPTY_FORM);
   };
 
+  const handleClearOrders = () => {
+    if (orders.length === 0) return;
+    if (!window.confirm('Clear all orders? This cannot be undone.')) return;
+    try { localStorage.removeItem('mpro_orders'); } catch { /* ignore */ }
+    onOrdersChange([]);
+    setExpandedId(null);
+    setShowForm(false);
+  };
+
   /* ── Toggle expand ────────────────────────────── */
   const toggleExpand = (id: string) => {
     setExpandedId((prev) => (prev === id ? null : id));
@@ -202,12 +211,21 @@ function OrdersPanel({ orders, onOrdersChange }: OrdersPanelProps) {
         </span>
       </div>
       {!showForm && (
-        <button
-          className="orders-new-btn"
-          onClick={() => setShowForm(true)}
-        >
-          + New Order
-        </button>
+        <div className="orders-header-actions">
+          <button
+            className="orders-clear-btn"
+            onClick={handleClearOrders}
+            disabled={orders.length === 0}
+          >
+            Clear Orders
+          </button>
+          <button
+            className="orders-new-btn"
+            onClick={() => setShowForm(true)}
+          >
+            + New Order
+          </button>
+        </div>
       )}
     </header>
   );

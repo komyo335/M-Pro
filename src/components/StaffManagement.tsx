@@ -1,234 +1,218 @@
-import { useState, useMemo, useEffect } from 'react';
-import type { StaffRole } from '../data/staff';
-import type { StaffMember } from '../data/staff';
-import { loadStaff, STAFF_ROLES, SHIFTS } from '../data/staff';
+import { useState, useMemo } from 'react';
+import type { StaffRole, StaffShift, StaffMember } from '../data/staff';
+import { STAFF_ROLES, SHIFTS, loadStaff, saveStaff } from '../data/staff';
 import './StaffManagement.css';
 
-function formatHireDate(iso: string): string {
-  const d = new Date(iso + 'T00:00:00');
-  return d.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
-}
+const ROLE_EMOJIS: Record<StaffRole, string> = {
+  manager: '👔',
+  barista: '☕',
+  cashier: '💳',
+  server: '🍽️',
+  chef: '👨‍🍳',
+};
 
-function statusLabel(status: StaffMember['status']): string {
-  switch (status) {
-    case 'active': return 'Active';
-    case 'on-break': return 'On Break';
-    case 'off': return 'Off Duty';
-  }
-}
+const STATUS_LABELS: Record<string, string> = {
+  active: '🟢 Active',
+  'on-break': '🟡 On Break',
+  off: '⚫ Off',
+};
 
-function roleLabel(role: StaffRole): string {
-  const found = STAFF_ROLES.find((r) => r.value === role);
-  return found ? `${found.icon} ${found.label}` : role;
-}
-
-function shiftLabel(shift: StaffMember['shift']): string {
-  const found = SHIFTS.find((s) => s.value === shift);
-  return found ? `${found.icon} ${found.label}` : shift;
-}
-
-function shiftHours(shift: StaffMember['shift']): string {
-  const found = SHIFTS.find((s) => s.value === shift);
-  return found?.hours ?? '';
-}
+const EMPTY_FORM = {
+  name: '',
+  email: '',
+  phone: '',
+  role: 'cashier' as StaffRole,
+  shift: 'morning' as StaffShift,
+};
 
 function StaffManagement() {
   const [staff, setStaff] = useState<StaffMember[]>(loadStaff);
-  const [activeRole, setActiveRole] = useState<string>('all');
-  const [selectedStaff, setSelectedStaff] = useState<string | null>(null);
+  const [showForm, setShowForm] = useState(false);
+  const [newUser, setNewUser] = useState(EMPTY_FORM);
+  const [formError, setFormError] = useState<string | null>(null);
 
-  // Reload staff from localStorage whenever the panel opens
-  useEffect(() => {
-    setStaff(loadStaff());
-  }, []);
-
-  const filteredStaff = useMemo(() => {
-    if (activeRole === 'all') return staff;
-    return staff.filter((s) => s.role === activeRole);
-  }, [activeRole, staff]);
-
-  const activeMember = useMemo(
-    () => staff.find((s) => s.id === selectedStaff) ?? null,
-    [selectedStaff, staff],
-  );
-
-  const roleCounts = useMemo(() => {
-    const counts: Record<string, number> = { all: staff.length };
-    for (const role of STAFF_ROLES) {
-      if (role.value !== 'all') {
-        counts[role.value] = staff.filter((s) => s.role === role.value).length;
-      }
+  const handleCreateAdmin = () => {
+    if (!newUser.name.trim()) {
+      setFormError('Name is required.');
+      return;
     }
-    return counts;
-  }, [staff]);
+    if (!newUser.email.trim()) {
+      setFormError('Email is required.');
+      return;
+    }
 
-  // Aggregate stats
-  const stats = useMemo(() => {
-    const activeCount = staff.filter((s) => s.status === 'active').length;
-    const onBreakCount = staff.filter((s) => s.status === 'on-break').length;
-    const offCount = staff.filter((s) => s.status === 'off').length;
-    const totalOrdersHandled = staff.reduce((sum, s) => sum + s.ordersHandled, 0);
-    return { activeCount, onBreakCount, offCount, totalOrdersHandled };
-  }, [staff]);
+    const newMember: StaffMember = {
+      id: `s${Date.now()}`,
+      name: newUser.name.trim(),
+      role: newUser.role,
+      shift: newUser.shift,
+      email: newUser.email.trim(),
+      phone: newUser.phone.trim(),
+      status: 'active',
+      hireDate: new Date().toISOString().split('T')[0],
+      emoji: ROLE_EMOJIS[newUser.role],
+      ordersHandled: 0,
+      notes: 'New admin created via Admin Management.',
+    };
+
+    const updated = [...staff, newMember];
+    saveStaff(updated);
+    setStaff(updated);
+
+    setShowForm(false);
+    setNewUser(EMPTY_FORM);
+    setFormError(null);
+  };
+
+  const handleDeleteAdmin = (id: string) => {
+    if (!window.confirm('Remove this admin? This cannot be undone.')) return;
+    const updated = staff.filter((s) => s.id !== id);
+    saveStaff(updated);
+    setStaff(updated);
+  };
+
+  const handleCancel = () => {
+    setShowForm(false);
+    setNewUser(EMPTY_FORM);
+    setFormError(null);
+  };
 
   return (
     <div className="staff-mgmt">
       {/* ── Header ────────────────────────────────────── */}
       <header className="staff-header">
-        <h2>Staff</h2>
+        <h2>Admin Management</h2>
         <p className="staff-subtitle">
           Manage employee profiles, shifts, and performance across your team.
         </p>
       </header>
 
-      {/* ── Stats bar ─────────────────────────────────── */}
-      <div className="staff-stats">
-        <div className="staff-stat-card staff-stat--active">
-          <span className="staff-stat-icon" aria-hidden="true">🟢</span>
-          <span className="staff-stat-value">{stats.activeCount}</span>
-          <span className="staff-stat-label">Active</span>
-        </div>
-        <div className="staff-stat-card staff-stat--break">
-          <span className="staff-stat-icon" aria-hidden="true">🟡</span>
-          <span className="staff-stat-value">{stats.onBreakCount}</span>
-          <span className="staff-stat-label">On Break</span>
-        </div>
-        <div className="staff-stat-card staff-stat--off">
-          <span className="staff-stat-icon" aria-hidden="true">⚪</span>
-          <span className="staff-stat-value">{stats.offCount}</span>
-          <span className="staff-stat-label">Off Duty</span>
-        </div>
-        <div className="staff-stat-card staff-stat--total">
-          <span className="staff-stat-icon" aria-hidden="true">📋</span>
-          <span className="staff-stat-value">{stats.totalOrdersHandled.toLocaleString()}</span>
-          <span className="staff-stat-label">Orders Handled</span>
-        </div>
-      </div>
-
-      {/* ── Role Tabs ─────────────────────────────────── */}
-      <nav className="staff-tabs" role="tablist" aria-label="Staff roles">
-        {STAFF_ROLES.map((role) => (
-          <button
-            key={role.value}
-            role="tab"
-            aria-selected={activeRole === role.value}
-            className={`staff-tab ${activeRole === role.value ? 'active' : ''}`}
-            onClick={() => {
-              setActiveRole(role.value);
-              setSelectedStaff(null);
-            }}
-          >
-            <span className="staff-tab-icon" aria-hidden="true">{role.icon}</span>
-            <span className="staff-tab-label">{role.label}</span>
-            <span className="staff-tab-count">{roleCounts[role.value]}</span>
+      {/* ── Add User Section ──────────────────────────── */}
+      <div className="staff-add-section">
+        {!showForm ? (
+          <button className="staff-add-btn" onClick={() => setShowForm(true)}>
+            <span className="staff-add-btn-icon" aria-hidden="true">➕</span>
+            Add Admin
           </button>
-        ))}
-      </nav>
-
-      {/* ── Content area ──────────────────────────────── */}
-      <div className="staff-content">
-        {/* Staff list */}
-        <section className="staff-list">
-          {filteredStaff.length === 0 ? (
-            <div className="staff-empty">
-              <span className="staff-empty-icon" aria-hidden="true">🔍</span>
-              <p>No staff members in this role.</p>
-            </div>
-          ) : (
-            <div className="staff-grid">
-              {filteredStaff.map((member) => (
-                <button
-                  key={member.id}
-                  className={`staff-card ${selectedStaff === member.id ? 'selected' : ''}`}
-                  onClick={() =>
-                    setSelectedStaff(selectedStaff === member.id ? null : member.id)
-                  }
+        ) : (
+          <div className="staff-add-form">
+            <h3>Create New Admin</h3>
+            <div className="staff-form-grid">
+              <div className="staff-form-field">
+                <label htmlFor="staff-name">Name</label>
+                <input
+                  id="staff-name"
+                  type="text"
+                  placeholder="Full name"
+                  value={newUser.name}
+                  onChange={(e) => { setNewUser({ ...newUser, name: e.target.value }); setFormError(null); }}
+                />
+              </div>
+              <div className="staff-form-field">
+                <label htmlFor="staff-email">Email</label>
+                <input
+                  id="staff-email"
+                  type="email"
+                  placeholder="email@example.com"
+                  value={newUser.email}
+                  onChange={(e) => { setNewUser({ ...newUser, email: e.target.value }); setFormError(null); }}
+                />
+              </div>
+              <div className="staff-form-field">
+                <label htmlFor="staff-phone">Phone</label>
+                <input
+                  id="staff-phone"
+                  type="tel"
+                  placeholder="(555) 123-4567"
+                  value={newUser.phone}
+                  onChange={(e) => setNewUser({ ...newUser, phone: e.target.value })}
+                />
+              </div>
+              <div className="staff-form-field">
+                <label htmlFor="staff-role">Role</label>
+                <select
+                  id="staff-role"
+                  value={newUser.role}
+                  onChange={(e) => setNewUser({ ...newUser, role: e.target.value as StaffRole })}
                 >
-                  <span className="staff-card-emoji" aria-hidden="true">
-                    {member.emoji}
-                  </span>
-                  <span className="staff-card-name">{member.name}</span>
-                  <span className="staff-card-role">{roleLabel(member.role)}</span>
-                  <span className={`staff-card-status staff-card-status--${member.status}`}>
-                    {statusLabel(member.status)}
-                  </span>
-                </button>
-              ))}
+                  {STAFF_ROLES.filter((r) => r.value !== 'all').map((role) => (
+                    <option key={role.value} value={role.value}>
+                      {role.icon} {role.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div className="staff-form-field">
+                <label htmlFor="staff-shift">Shift</label>
+                <select
+                  id="staff-shift"
+                  value={newUser.shift}
+                  onChange={(e) => setNewUser({ ...newUser, shift: e.target.value as StaffShift })}
+                >
+                  {SHIFTS.map((shift) => (
+                    <option key={shift.value} value={shift.value}>
+                      {shift.icon} {shift.label} ({shift.hours})
+                    </option>
+                  ))}
+                </select>
+              </div>
             </div>
-          )}
-        </section>
 
-        {/* Staff detail panel */}
-        {activeMember && (
-          <aside className="staff-detail">
-            <div className="staff-detail-header">
-              <span className="staff-detail-emoji" aria-hidden="true">
-                {activeMember.emoji}
-              </span>
-              <h3>{activeMember.name}</h3>
-              <button
-                className="staff-detail-close"
-                onClick={() => setSelectedStaff(null)}
-                aria-label="Close staff detail"
-              >
-                ×
+            {formError && (
+              <p className="staff-form-error">{formError}</p>
+            )}
+
+            <div className="staff-form-actions">
+              <button className="staff-form-submit" onClick={handleCreateAdmin}>
+                ✓ Create Admin
+              </button>
+              <button className="staff-form-cancel" onClick={handleCancel}>
+                ✕ Cancel
               </button>
             </div>
+          </div>
+        )}
+      </div>
 
-            <div className="staff-detail-body">
-              <div className="staff-detail-row">
-                <span className="staff-detail-label">Role</span>
-                <span className="staff-detail-value">
-                  {roleLabel(activeMember.role)}
-                </span>
+      {/* ── Admin List ────────────────────────────────── */}
+      <div className="staff-list">
+        <h3 className="staff-list-title">All Admins ({staff.length})</h3>
+        {staff.length === 0 ? (
+          <p className="staff-list-empty">No admins yet. Create one above.</p>
+        ) : (
+          <div className="staff-list-grid">
+            {staff.map((member) => (
+              <div key={member.id} className="staff-card">
+                <div className="staff-card-header">
+                  <span className="staff-card-emoji" aria-hidden="true">{member.emoji}</span>
+                  <div className="staff-card-info">
+                    <span className="staff-card-name">{member.name}</span>
+                    <span className="staff-card-role">
+                      {STAFF_ROLES.find((r) => r.value === member.role)?.label ?? member.role}
+                    </span>
+                  </div>
+                  <button
+                    className="staff-card-delete"
+                    onClick={() => handleDeleteAdmin(member.id)}
+                    aria-label={`Remove ${member.name}`}
+                    title="Remove admin"
+                  >
+                    ×
+                  </button>
+                </div>
+                <div className="staff-card-details">
+                  <span className="staff-card-detail">{member.email}</span>
+                  {member.phone && <span className="staff-card-detail">{member.phone}</span>}
+                  <span className="staff-card-detail">
+                    {SHIFTS.find((s) => s.value === member.shift)?.label ?? member.shift} shift
+                  </span>
+                  <span className={`staff-card-status staff-card-status--${member.status}`}>
+                    {STATUS_LABELS[member.status] ?? member.status}
+                  </span>
+                </div>
               </div>
-              <div className="staff-detail-row">
-                <span className="staff-detail-label">Shift</span>
-                <span className="staff-detail-value">
-                  {shiftLabel(activeMember.shift)}
-                </span>
-              </div>
-              <div className="staff-detail-row">
-                <span className="staff-detail-label">Hours</span>
-                <span className="staff-detail-value">{shiftHours(activeMember.shift)}</span>
-              </div>
-              <div className="staff-detail-row">
-                <span className="staff-detail-label">Status</span>
-                <span className={`staff-detail-value staff-detail-status staff-detail-status--${activeMember.status}`}>
-                  {statusLabel(activeMember.status)}
-                </span>
-              </div>
-              <div className="staff-detail-row">
-                <span className="staff-detail-label">Email</span>
-                <span className="staff-detail-value staff-detail-email">
-                  {activeMember.email}
-                </span>
-              </div>
-              <div className="staff-detail-row">
-                <span className="staff-detail-label">Phone</span>
-                <span className="staff-detail-value">{activeMember.phone}</span>
-              </div>
-              <div className="staff-detail-row">
-                <span className="staff-detail-label">Hire Date</span>
-                <span className="staff-detail-value">
-                  {formatHireDate(activeMember.hireDate)}
-                </span>
-              </div>
-              <div className="staff-detail-row">
-                <span className="staff-detail-label">Orders Handled</span>
-                <span className="staff-detail-value">
-                  {activeMember.ordersHandled.toLocaleString()}
-                </span>
-              </div>
-            </div>
-
-            {activeMember.notes && (
-              <div className="staff-detail-notes">
-                <span className="staff-detail-notes-label">Notes</span>
-                <p className="staff-detail-notes-text">{activeMember.notes}</p>
-              </div>
-            )}
-          </aside>
+            ))}
+          </div>
         )}
       </div>
     </div>

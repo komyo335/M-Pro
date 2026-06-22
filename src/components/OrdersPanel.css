@@ -36,6 +36,44 @@
   font-family: var(--mono);
 }
 
+/* ---- Header actions (Clear + New Order) ---- */
+.orders-header-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+/* ---- Clear Orders button ---- */
+.orders-clear-btn {
+  padding: 12px 20px;
+  font-size: 15px;
+  font-weight: 500;
+  font-family: var(--sans);
+  color: var(--text);
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.orders-clear-btn:hover:not(:disabled) {
+  background: rgba(239, 68, 68, 0.06);
+  border-color: #ef4444;
+  color: #ef4444;
+}
+
+.orders-clear-btn:focus-visible {
+  outline: 2px solid #ef4444;
+  outline-offset: 2px;
+}
+
+.orders-clear-btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
 /* ---- + New Order button ----   matches .checkout-btn-primary */
 .orders-new-btn {
   padding: 12px 20px;
@@ -692,6 +730,15 @@
     flex-direction: column;
     align-items: stretch;
     gap: 8px;
+  }
+
+  .orders-header-actions {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .orders-clear-btn {
+    width: 100%;
   }
 
   .orders-new-btn {

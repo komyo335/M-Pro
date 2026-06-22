@@ -123,6 +123,11 @@ function POSDashboard({ onCheckout }: POSDashboardProps) {
     setCart((prev) => prev.filter((item) => item.product.id !== productId));
   };
 
+  const handleClearCart = () => {
+    if (cart.length === 0) return;
+    setCart([]);
+  };
+
   const handleCheckout = () => {
     if (cart.length === 0) return;
     const next = dailySales + total;
@@ -313,13 +318,21 @@ function POSDashboard({ onCheckout }: POSDashboardProps) {
                     </div>
                   </div>
 
-                  <button
-                    className="pos-checkout-btn"
-                    onClick={handleCheckout}
-                    disabled={cart.length === 0}
-                  >
-                    Checkout — {formatCurrency(total)}
-                  </button>
+                  <div className="pos-cart-actions">
+                    <button
+                      className="pos-clear-cart-btn"
+                      onClick={handleClearCart}
+                    >
+                      Clear Cart
+                    </button>
+                    <button
+                      className="pos-checkout-btn"
+                      onClick={handleCheckout}
+                      disabled={cart.length === 0}
+                    >
+                      Checkout — {formatCurrency(total)}
+                    </button>
+                  </div>
                 </>
               )}
             </aside>

@@ -8,7 +8,7 @@ auto-advance: 20
 
 ---
 <!-- slide 1 -->
-#Who's my person?
+# Who's my person?
 **Aspiring makers **
 
  It's a POS for Coffee and Snack Cafe,it mainly  for  employee and  staff of that Cafe. 

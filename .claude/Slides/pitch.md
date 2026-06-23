@@ -9,6 +9,8 @@ auto-advance: 20
 ---
 <!-- slide 1 -->
 #Who's my person?
+**Aspiring makers **
+
  It's a POS for Coffee and Snack Cafe,it mainly  for  employee and  staff of that Cafe. 
 <!-- 20s -->
 
@@ -16,6 +18,7 @@ auto-advance: 20
 
 <!-- slide 2 -->
 # Their problem
+
  It may solve the problem for making  record, order , daily income,customer types  of that's cafe and it can also make a report for all of this.
 
 ---

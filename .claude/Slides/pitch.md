@@ -6,22 +6,23 @@ transition: fade
 auto-advance: 20
 ---
 
+---
 <!-- slide 1 -->
 #Who's my person?
-## It's a POS for Coffee and Snack Cafe,it mainly  for  employee and  staff of that Cafe. 
+ It's a POS for Coffee and Snack Cafe,it mainly  for  employee and  staff of that Cafe. 
 <!-- 20s -->
 
 ---
 
 <!-- slide 2 -->
 # Their problem
-## It may solve the problem for making  record, order , daily income,customer types  of that's cafe and it can also make a report for all of this.
+ It may solve the problem for making  record, order , daily income,customer types  of that's cafe and it can also make a report for all of this.
 
 ---
 
 <!-- slide 3 -->
 # What I built
-## I built a POS System for a small Coffee and Snack Cafe. All record of income,order and customer are included.
+ I built a POS System for a small Coffee and Snack Cafe. All record of income,order and customer are included.
 
 ---
 

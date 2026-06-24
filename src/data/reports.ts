@@ -270,13 +270,25 @@ export function computeOrderMetrics(orders: Order[], period: ReportPeriod): Orde
 /**
  * Compute all customer-based metrics (all-time, not period-filtered).
  * Pure function — calls loadCustomers() which reads localStorage.
+ * Now also cross-references with order data for customerId linking.
  */
-export function computeCustomerMetrics(): CustomerMetrics {
+export function computeCustomerMetrics(orders?: Order[]): CustomerMetrics {
   const allCustomers = loadCustomers();
   const totalCustomers = allCustomers.length;
   const totalCustomerSpent = allCustomers.reduce((sum, c) => sum + c.totalSpent, 0);
   const totalCustomerVisits = allCustomers.reduce((sum, c) => sum + c.visits, 0);
   const avgPerVisit = totalCustomerVisits > 0 ? totalCustomerSpent / totalCustomerVisits : 0;
+
+  // Link orders to customers via customerId for enriched metrics
+  const ordersByCustomerId: Record<string, Order[]> = {};
+  if (orders) {
+    for (const o of orders) {
+      if (o.customerId) {
+        if (!ordersByCustomerId[o.customerId]) ordersByCustomerId[o.customerId] = [];
+        ordersByCustomerId[o.customerId].push(o);
+      }
+    }
+  }
 
   const byDemographic: Record<string, { spent: number; visits: number; count: number; emoji: string }> = {};
   for (const demo of DEMOGRAPHICS) {
@@ -333,7 +345,7 @@ export function useReportData(orders: Order[], period: ReportPeriod): ReportData
   );
 
   const customerMetrics = useMemo(
-    () => computeCustomerMetrics(),
+    () => computeCustomerMetrics(orders),
     // Customer data comes from localStorage — recompute only when orders change
     // (orders change when a new order is completed, which updates customer stats)
     [orders],

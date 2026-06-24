@@ -127,3 +127,39 @@
 .login-success p {
   font-size: 15px;
 }
+
+.login-toggle {
+  text-align: center;
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border);
+}
+
+.login-toggle p {
+  font-size: 14px;
+  color: var(--text);
+  margin: 0;
+}
+
+.login-toggle-btn {
+  background: none;
+  border: none;
+  color: #3b82f6;
+  font-size: 14px;
+  font-weight: 600;
+  font-family: var(--sans);
+  cursor: pointer;
+  padding: 0;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.login-toggle-btn:hover {
+  opacity: 0.8;
+}
+
+.login-toggle-btn:focus-visible {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+  border-radius: 2px;
+}

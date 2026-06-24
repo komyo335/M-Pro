@@ -43,6 +43,31 @@
   align-items: center;
 }
 
+/* ---- Reports button ---- */
+.orders-reports-btn {
+  padding: 12px 20px;
+  font-size: 15px;
+  font-weight: 500;
+  font-family: var(--sans);
+  color: #3b82f6;
+  background: rgba(59, 130, 246, 0.08);
+  border: 1px solid rgba(59, 130, 246, 0.3);
+  border-radius: 10px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.orders-reports-btn:hover {
+  background: rgba(59, 130, 246, 0.14);
+  border-color: #3b82f6;
+}
+
+.orders-reports-btn:focus-visible {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+}
+
 /* ---- Clear Orders button ---- */
 .orders-clear-btn {
   padding: 12px 20px;

@@ -20,9 +20,10 @@ import './ReportsPanel.css';
 
 interface ReportsPanelProps {
   orders: Order[];
+  onNavigateToOrders?: () => void;
 }
 
-function ReportsPanel({ orders }: ReportsPanelProps) {
+function ReportsPanel({ orders, onNavigateToOrders }: ReportsPanelProps) {
   const [activePeriod, setActivePeriod] = useState<ReportPeriod>('today');
 
   /* ── All report data computed by the shared data module ── */
@@ -47,6 +48,36 @@ function ReportsPanel({ orders }: ReportsPanelProps) {
   const maxHourRevenue = Math.max(1, ...Object.values(metrics.byHour).map((h) => h.revenue));
   const peakHour = Object.entries(metrics.byHour).sort(([, a], [, b]) => b.orders - a.orders)[0];
 
+  /* ── Export handler ───────────────────────────────── */
+  const handleExportOrders = () => {
+    if (metrics.orders.length === 0) return;
+    const csv = [
+      'Order ID,Date,Time,Items,Subtotal,Tax,Total,Payment,Customer,Type,Demographic',
+      ...metrics.orders.map((o) =>
+        [
+          o.id,
+          formatDate(o.createdAt),
+          toTime(o.createdAt),
+          o.items.reduce((s, i) => s + i.quantity, 0),
+          o.subtotal.toFixed(2),
+          o.tax.toFixed(2),
+          o.total.toFixed(2),
+          o.paymentMethod,
+          o.customerName || '',
+          o.customerType || '',
+          o.customerDemographic || '',
+        ].join(',')
+      ),
+    ].join('\n');
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `orders-${activePeriod}-${new Date().toISOString().slice(0, 10)}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
   return (
     <div className="reports-panel">
       {/* ── Header ────────────────────────────────────── */}
@@ -56,6 +87,23 @@ function ReportsPanel({ orders }: ReportsPanelProps) {
           <p className="reports-subtitle">
             Revenue, orders, customers, and catalog analytics — all in one view.
           </p>
+        </div>
+        <div className="reports-header-actions">
+          {onNavigateToOrders && (
+            <button
+              className="reports-action-btn reports-action-btn--nav"
+              onClick={onNavigateToOrders}
+            >
+              📋 View Orders
+            </button>
+          )}
+          <button
+            className="reports-action-btn reports-action-btn--export"
+            onClick={handleExportOrders}
+            disabled={metrics.orders.length === 0}
+          >
+            📥 Export CSV
+          </button>
         </div>
       </header>
 
@@ -78,6 +126,7 @@ function ReportsPanel({ orders }: ReportsPanelProps) {
       <section className="reports-section">
         <h3 className="reports-section-title">
           💰 Income Summary
+          <span className="reports-section-period">{activePeriod === 'today' ? 'Today' : activePeriod === 'yesterday' ? 'Yesterday' : activePeriod === 'week' ? 'This Week' : activePeriod === 'month' ? 'This Month' : 'All Time'}</span>
         </h3>
         <div className="reports-kpis">
           <div className="reports-kpi-card reports-kpi-card--highlight">
@@ -90,29 +139,72 @@ function ReportsPanel({ orders }: ReportsPanelProps) {
             <span className="reports-kpi-icon" aria-hidden="true">🧾</span>
             <span className="reports-kpi-label">Order-Based Revenue</span>
             <span className="reports-kpi-value">{formatCurrency(metrics.totalRevenue)}</span>
-            <span className="reports-kpi-source">{activePeriod} orders</span>
+            <div className="reports-kpi-detail">
+              <span className="reports-kpi-detail-item">
+                <span className="reports-kpi-detail-label">Subtotal</span>
+                <span className="reports-kpi-detail-value">{formatCurrency(metrics.totalSubtotal)}</span>
+              </span>
+              <span className="reports-kpi-detail-item">
+                <span className="reports-kpi-detail-label">Tax</span>
+                <span className="reports-kpi-detail-value">{formatCurrency(metrics.totalTax)}</span>
+              </span>
+            </div>
           </div>
           <div className="reports-kpi-card">
             <span className="reports-kpi-icon" aria-hidden="true">📋</span>
             <span className="reports-kpi-label">Order Count</span>
             <span className="reports-kpi-value">{metrics.orderCount}</span>
-            <span className="reports-kpi-source">{activePeriod}</span>
+            <div className="reports-kpi-detail">
+              <span className="reports-kpi-detail-item">
+                <span className="reports-kpi-detail-label">Avg. Items</span>
+                <span className="reports-kpi-detail-value">{metrics.orderCount > 0 ? (metrics.totalItems / metrics.orderCount).toFixed(1) : '0'}</span>
+              </span>
+              <span className="reports-kpi-detail-item">
+                <span className="reports-kpi-detail-label">Total Items</span>
+                <span className="reports-kpi-detail-value">{metrics.totalItems}</span>
+              </span>
+            </div>
           </div>
           <div className="reports-kpi-card">
             <span className="reports-kpi-icon" aria-hidden="true">📊</span>
             <span className="reports-kpi-label">Avg. Order Value</span>
             <span className="reports-kpi-value">{formatCurrency(metrics.avgOrderValue)}</span>
+            <div className="reports-kpi-detail">
+              <span className="reports-kpi-detail-item">
+                <span className="reports-kpi-detail-label">Revenue/Item</span>
+                <span className="reports-kpi-detail-value">{metrics.totalItems > 0 ? formatCurrency(metrics.totalRevenue / metrics.totalItems) : '$0.00'}</span>
+              </span>
+            </div>
           </div>
           <div className="reports-kpi-card">
             <span className="reports-kpi-icon" aria-hidden="true">📦</span>
             <span className="reports-kpi-label">Items Sold</span>
             <span className="reports-kpi-value">{metrics.totalItems}</span>
+            <div className="reports-kpi-detail">
+              <span className="reports-kpi-detail-item">
+                <span className="reports-kpi-detail-label">Unique Products</span>
+                <span className="reports-kpi-detail-value">{metrics.topByRevenue.length}</span>
+              </span>
+              <span className="reports-kpi-detail-item">
+                <span className="reports-kpi-detail-label">Categories</span>
+                <span className="reports-kpi-detail-value">{Object.keys(metrics.byCategory).length}</span>
+              </span>
+            </div>
           </div>
           <div className="reports-kpi-card">
             <span className="reports-kpi-icon" aria-hidden="true">💸</span>
             <span className="reports-kpi-label">Tax Collected</span>
             <span className="reports-kpi-value">{formatCurrency(metrics.totalTax)}</span>
-            <span className="reports-kpi-source">{(TAX_RATE * 100).toFixed(0)}% rate</span>
+            <div className="reports-kpi-detail">
+              <span className="reports-kpi-detail-item">
+                <span className="reports-kpi-detail-label">Tax Rate</span>
+                <span className="reports-kpi-detail-value">{(TAX_RATE * 100).toFixed(0)}%</span>
+              </span>
+              <span className="reports-kpi-detail-item">
+                <span className="reports-kpi-detail-label">% of Revenue</span>
+                <span className="reports-kpi-detail-value">{metrics.totalRevenue > 0 ? ((metrics.totalTax / metrics.totalRevenue) * 100).toFixed(1) : '0'}%</span>
+              </span>
+            </div>
           </div>
         </div>
       </section>
@@ -404,6 +496,12 @@ function ReportsPanel({ orders }: ReportsPanelProps) {
             <span className="reports-kpi-value">{customerMetrics.totalCustomers}</span>
           </div>
           <div className="reports-kpi-card">
+            <span className="reports-kpi-icon" aria-hidden="true">📋</span>
+            <span className="reports-kpi-label">Linked Orders</span>
+            <span className="reports-kpi-value">{orders.length}</span>
+            <span className="reports-kpi-source">with customer data</span>
+          </div>
+          <div className="reports-kpi-card">
             <span className="reports-kpi-icon" aria-hidden="true">💰</span>
             <span className="reports-kpi-label">Total Customer Spend</span>
             <span className="reports-kpi-value">{formatCurrency(customerMetrics.totalCustomerSpent)}</span>
@@ -488,45 +586,83 @@ function ReportsPanel({ orders }: ReportsPanelProps) {
             <p>No orders in this period.</p>
           </div>
         ) : (
-          <div className="reports-orders-table-wrap">
-            <table className="reports-orders-table">
-              <thead>
-                <tr>
-                  <th>Order ID</th>
-                  <th>Date</th>
-                  <th>Time</th>
-                  <th>Items</th>
-                  <th>Subtotal</th>
-                  <th>Tax</th>
-                  <th>Total</th>
-                  <th>Payment</th>
-                  <th>Type</th>
-                  <th>Customer</th>
-                  <th>Segment</th>
-                </tr>
-              </thead>
-              <tbody>
-                {metrics.orders.slice(0, 50).map((order) => (
-                  <tr key={order.id}>
-                    <td className="reports-order-id">{order.id}</td>
-                    <td>{formatDate(order.createdAt)}</td>
-                    <td className="reports-mono">{toTime(order.createdAt)}</td>
-                    <td className="reports-order-items">
-                      {order.items.reduce((s, i) => s + i.quantity, 0)}
-                    </td>
-                    <td className="reports-mono">{formatCurrency(order.subtotal)}</td>
-                    <td className="reports-mono">{formatCurrency(order.tax)}</td>
-                    <td className="reports-mono reports-total-cell">
-                      {formatCurrency(order.total)}
-                    </td>
-                    <td>{paymentLabel(order.paymentMethod)}</td>
-                    <td>{order.customerType ? customerTypeLabel(order.customerType) : '—'}</td>
-                    <td>{order.customerName || '—'}</td>
-                    <td>{order.customerDemographic ? demographicLabel(order.customerDemographic) : '—'}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+          <div className="reports-orders-list">
+            {metrics.orders.slice(0, 50).map((order) => (
+              <div key={order.id} className="reports-order-card">
+                <div className="reports-order-header">
+                  <div className="reports-order-info">
+                    <span className="reports-order-id" title="Click to copy">
+                      <button
+                        className="reports-order-id-btn"
+                        onClick={() => {
+                          navigator.clipboard.writeText(order.id);
+                        }}
+                      >
+                        {order.id}
+                      </button>
+                    </span>
+                    <span className="reports-order-date">
+                      {formatDate(order.createdAt)} {toTime(order.createdAt)}
+                    </span>
+                  </div>
+                  <div className="reports-order-meta">
+                    {order.customerName && (
+                      <span className="reports-order-customer">
+                        👤 {order.customerName}
+                      </span>
+                    )}
+                    {order.customerType && (
+                      <span className="reports-order-type">
+                        {customerTypeLabel(order.customerType)}
+                      </span>
+                    )}
+                    {order.customerDemographic && (
+                      <span className="reports-order-demographic">
+                        {demographicLabel(order.customerDemographic)}
+                      </span>
+                    )}
+                  </div>
+                </div>
+
+                <ul className="reports-order-items">
+                  {order.items.map((item) => (
+                    <li key={item.product.id} className="reports-order-item">
+                      <span className="reports-order-item-emoji" aria-hidden="true">
+                        {item.product.emoji}
+                      </span>
+                      <span className="reports-order-item-name">
+                        {item.product.name}
+                      </span>
+                      <span className="reports-order-item-qty">
+                        ×{item.quantity}
+                      </span>
+                      <span className="reports-order-item-price">
+                        {formatCurrency(item.product.price * item.quantity)}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+
+                <div className="reports-order-totals">
+                  <div className="reports-order-row">
+                    <span>Subtotal</span>
+                    <span>{formatCurrency(order.subtotal)}</span>
+                  </div>
+                  <div className="reports-order-row">
+                    <span>Tax</span>
+                    <span>{formatCurrency(order.tax)}</span>
+                  </div>
+                  <div className="reports-order-row reports-order-grand">
+                    <span>Total</span>
+                    <span>{formatCurrency(order.total)}</span>
+                  </div>
+                  <div className="reports-order-row">
+                    <span>Payment</span>
+                    <span>{paymentLabel(order.paymentMethod)}</span>
+                  </div>
+                </div>
+              </div>
+            ))}
             {metrics.orderCount > 50 && (
               <p className="reports-table-note">
                 Showing 50 of {metrics.orderCount} orders.

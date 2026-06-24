@@ -99,9 +99,10 @@ function formSubtotal(items: FormLineItem[]): number {
 interface OrdersPanelProps {
   orders: Order[];
   onOrdersChange: Dispatch<SetStateAction<Order[]>>;
+  onNavigateToReports?: () => void;
 }
 
-function OrdersPanel({ orders, onOrdersChange }: OrdersPanelProps) {
+function OrdersPanel({ orders, onOrdersChange, onNavigateToReports }: OrdersPanelProps) {
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState<ManualOrderInput>(EMPTY_FORM);
@@ -212,6 +213,14 @@ function OrdersPanel({ orders, onOrdersChange }: OrdersPanelProps) {
       </div>
       {!showForm && (
         <div className="orders-header-actions">
+          {onNavigateToReports && (
+            <button
+              className="orders-reports-btn"
+              onClick={onNavigateToReports}
+            >
+              📈 Reports
+            </button>
+          )}
           <button
             className="orders-clear-btn"
             onClick={handleClearOrders}

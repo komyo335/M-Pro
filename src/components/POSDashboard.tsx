@@ -192,13 +192,20 @@ function POSDashboard({ onCheckout }: POSDashboardProps) {
         {activeMenu === 'settings' ? (
           <SettingsPanel />
         ) : activeMenu === 'orders' ? (
-          <OrdersPanel orders={orders} onOrdersChange={setOrders} />
+          <OrdersPanel
+            orders={orders}
+            onOrdersChange={setOrders}
+            onNavigateToReports={() => setActiveMenu('reports')}
+          />
         ) : activeMenu === 'customers' ? (
           <CustomerManagement />
         ) : activeMenu === 'staff' ? (
           <StaffManagement />
         ) : activeMenu === 'reports' ? (
-          <ReportsPanel orders={orders} />
+          <ReportsPanel
+            orders={orders}
+            onNavigateToOrders={() => setActiveMenu('orders')}
+          />
         ) : (
           <>
             {/* Product catalog */}

@@ -249,17 +249,26 @@
   overflow-y: auto;
 }
 
+/* ---- Catalog header (tabs + add button) ---- */
+.pos-catalog-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
 /* ---- Category tabs ---- */
 .pos-categories {
   display: flex;
   gap: 4px;
-  margin-bottom: 20px;
   padding: 4px;
   background: var(--code-bg);
   border-radius: 10px;
   width: fit-content;
   max-width: 100%;
   overflow-x: auto;
+  flex: 1;
 }
 
 .pos-cat-tab {
@@ -291,6 +300,199 @@
   outline-offset: -2px;
 }
 
+/* ---- Add Item button ---- */
+.pos-add-item-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  font-size: 14px;
+  font-family: var(--sans);
+  font-weight: 500;
+  color: #fff;
+  background: #3b82f6;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: opacity 0.15s, transform 0.1s;
+  flex-shrink: 0;
+}
+
+.pos-add-item-btn:hover {
+  opacity: 0.9;
+  transform: translateY(-1px);
+}
+
+.pos-add-item-btn:focus-visible {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+}
+
+.pos-add-item-icon {
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+/* ---- Modal overlay ---- */
+.pos-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  animation: pos-modal-fade-in 0.15s ease;
+}
+
+@keyframes pos-modal-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* ---- Modal ---- */
+.pos-modal {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  width: 90%;
+  max-width: 400px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  animation: pos-modal-slide-up 0.2s ease;
+}
+
+@keyframes pos-modal-slide-up {
+  from { transform: translateY(20px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+.pos-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 24px 0;
+}
+
+.pos-modal-header h3 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--text-h);
+}
+
+.pos-modal-close {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  color: var(--text);
+  background: transparent;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.pos-modal-close:hover {
+  background: var(--code-bg);
+}
+
+/* ---- Modal body / form ---- */
+.pos-modal-body {
+  padding: 20px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.pos-form-label {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text);
+}
+
+.pos-form-input {
+  padding: 10px 12px;
+  font-size: 14px;
+  font-family: var(--sans);
+  color: var(--text-h);
+  background: var(--code-bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  transition: border-color 0.15s;
+}
+
+.pos-form-input:focus {
+  outline: none;
+  border-color: #3b82f6;
+}
+
+.pos-form-input::placeholder {
+  color: var(--text);
+  opacity: 0.5;
+}
+
+.pos-form-emoji {
+  font-size: 24px;
+  text-align: center;
+  width: 80px;
+}
+
+
+/* ---- Modal actions ---- */
+.pos-modal-actions {
+  display: flex;
+  gap: 8px;
+  padding: 0 24px 20px;
+  justify-content: flex-end;
+}
+
+.pos-modal-cancel {
+  padding: 10px 18px;
+  font-size: 14px;
+  font-weight: 500;
+  font-family: var(--sans);
+  color: var(--text);
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.pos-modal-cancel:hover {
+  background: var(--code-bg);
+}
+
+.pos-modal-confirm {
+  padding: 10px 18px;
+  font-size: 14px;
+  font-weight: 600;
+  font-family: var(--sans);
+  color: #fff;
+  background: #3b82f6;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+
+.pos-modal-confirm:hover {
+  opacity: 0.9;
+}
+
+.pos-modal-confirm:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
 /* ---- Product grid ---- */
 .pos-product-grid {
   display: grid;
@@ -307,6 +509,10 @@
 }
 
 /* ---- Product card ---- */
+.pos-product-card-wrapper {
+  position: relative;
+}
+
 .pos-product-card {
   display: flex;
   flex-direction: column;
@@ -320,6 +526,7 @@
   font-family: var(--sans);
   transition: border-color 0.15s, box-shadow 0.15s, transform 0.1s;
   text-align: center;
+  width: 100%;
 }
 
 .pos-product-card:hover {
@@ -331,6 +538,50 @@
 .pos-product-card:focus-visible {
   outline: 2px solid #3b82f6;
   outline-offset: 2px;
+}
+
+/* ---- Product remove button ---- */
+.pos-product-remove {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 8px;
+  font-size: 12px;
+  font-family: var(--sans);
+  font-weight: 500;
+  color: #ef4444;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.15s, background 0.15s, border-color 0.15s;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.pos-product-card-wrapper:hover .pos-product-remove {
+  opacity: 1;
+}
+
+.pos-product-remove:hover {
+  background: rgba(239, 68, 68, 0.1);
+  border-color: #ef4444;
+}
+
+.pos-product-remove:focus-visible {
+  outline: 2px solid #ef4444;
+  outline-offset: 1px;
+  opacity: 1;
+}
+
+.pos-product-remove-icon {
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1;
 }
 
 .pos-product-emoji {

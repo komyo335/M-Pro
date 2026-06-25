@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect } from 'react';
-import type { CartItem, Order } from '../data/products';
+import type { CartItem, Order, Product } from '../data/products';
 import {
   PRODUCTS,
   CATEGORIES,
@@ -57,6 +57,16 @@ const MENU_ITEMS: MenuItem[] = [
   { id: 'settings', label: 'Settings', icon: '⚙️' },
 ];
 
+interface NewItemForm {
+  name: string;
+  price: string;
+  category: Product['category'];
+  emoji: string;
+}
+
+const EMPTY_FORM: NewItemForm = { name: '', price: '', category: 'drinks', emoji: '' };
+
+
 interface POSDashboardProps {
   /** Called when the user clicks Checkout with a non-empty cart. */
   onCheckout: (cart: CartItem[]) => void;
@@ -69,6 +79,8 @@ function POSDashboard({ onCheckout }: POSDashboardProps) {
   const [dailySales, setDailySales] = useState<number>(loadDailySales);
   const [orders, setOrders] = useState<Order[]>(loadOrders);
   const [staff, setStaff] = useState(loadStaff);
+  const [showAddItem, setShowAddItem] = useState(false);
+  const [newItem, setNewItem] = useState<NewItemForm>(EMPTY_FORM);
 
   // Reload staff whenever a re-render picks up localStorage changes
   useEffect(() => {
@@ -134,6 +146,33 @@ function POSDashboard({ onCheckout }: POSDashboardProps) {
     setDailySales(next);
     saveDailySales(next);
     onCheckout(cart);
+  };
+
+  const handleAddItem = () => {
+    if (!newItem.name.trim() || !newItem.price || !newItem.emoji.trim()) return;
+    const price = parseFloat(newItem.price);
+    if (isNaN(price) || price <= 0) return;
+
+    const id = newItem.name.toLowerCase().replace(/\s+/g, '-') + '-' + Date.now();
+    const product: Product = {
+      id,
+      name: newItem.name.trim(),
+      price,
+      category: newItem.category,
+      emoji: newItem.emoji.trim(),
+    };
+
+    PRODUCTS.push(product);
+    setNewItem(EMPTY_FORM);
+    setShowAddItem(false);
+  };
+
+  const handleRemoveItem = (productId: string) => {
+    const idx = PRODUCTS.findIndex((p) => p.id === productId);
+    if (idx === -1) return;
+    PRODUCTS.splice(idx, 1);
+    // Also remove from cart if present
+    setCart((prev) => prev.filter((item) => item.product.id !== productId));
   };
 
   return (
@@ -210,20 +249,30 @@ function POSDashboard({ onCheckout }: POSDashboardProps) {
           <>
             {/* Product catalog */}
             <section className="pos-catalog">
-              {/* Category tabs */}
-              <nav className="pos-categories" role="tablist" aria-label="Product categories">
-                {CATEGORIES.map((cat) => (
-                  <button
-                    key={cat}
-                    role="tab"
-                    aria-selected={activeCategory === cat}
-                    className={`pos-cat-tab ${activeCategory === cat ? 'active' : ''}`}
-                    onClick={() => setActiveCategory(cat)}
-                  >
-                    {cat}
-                  </button>
-                ))}
-              </nav>
+              {/* Category tabs + Add button */}
+              <div className="pos-catalog-header">
+                <nav className="pos-categories" role="tablist" aria-label="Product categories">
+                  {CATEGORIES.map((cat) => (
+                    <button
+                      key={cat}
+                      role="tab"
+                      aria-selected={activeCategory === cat}
+                      className={`pos-cat-tab ${activeCategory === cat ? 'active' : ''}`}
+                      onClick={() => setActiveCategory(cat)}
+                    >
+                      {cat}
+                    </button>
+                  ))}
+                </nav>
+                <button
+                  className="pos-add-item-btn"
+                  onClick={() => setShowAddItem(true)}
+                  title="Add new item"
+                >
+                  <span className="pos-add-item-icon" aria-hidden="true">+</span>
+                  <span className="pos-add-item-label">Add Item</span>
+                </button>
+              </div>
 
               {/* Product grid */}
               <div className="pos-product-grid">
@@ -233,19 +282,31 @@ function POSDashboard({ onCheckout }: POSDashboardProps) {
                   </div>
                 ) : (
                   filteredProducts.map((product) => (
-                    <button
-                      key={product.id}
-                      className="pos-product-card"
-                      onClick={() => addToCart(product)}
-                    >
-                      <span className="pos-product-emoji" aria-hidden="true">
-                        {product.emoji}
-                      </span>
-                      <span className="pos-product-name">{product.name}</span>
-                      <span className="pos-product-price">
-                        {formatCurrency(product.price)}
-                      </span>
-                    </button>
+                    <div key={product.id} className="pos-product-card-wrapper">
+                      <button
+                        className="pos-product-card"
+                        onClick={() => addToCart(product)}
+                      >
+                        <span className="pos-product-emoji" aria-hidden="true">
+                          {product.emoji}
+                        </span>
+                        <span className="pos-product-name">{product.name}</span>
+                        <span className="pos-product-price">
+                          {formatCurrency(product.price)}
+                        </span>
+                      </button>
+                      <button
+                        className="pos-product-remove"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleRemoveItem(product.id);
+                        }}
+                        aria-label={`Remove ${product.name}`}
+                        title={`Remove ${product.name}`}
+                      >
+                        Remove
+                      </button>
+                    </div>
                   ))
                 )}
               </div>
@@ -346,6 +407,88 @@ function POSDashboard({ onCheckout }: POSDashboardProps) {
           </>
         )}
       </div>
+
+      {/* Add New Item Modal */}
+      {showAddItem && (
+        <div className="pos-modal-overlay" onClick={() => setShowAddItem(false)}>
+          <div className="pos-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="pos-modal-header">
+              <h3>Add New Item</h3>
+              <button
+                className="pos-modal-close"
+                onClick={() => setShowAddItem(false)}
+                aria-label="Close"
+              >
+                ×
+              </button>
+            </div>
+            <div className="pos-modal-body">
+              <label className="pos-form-label">
+                Emoji
+                <input
+                  type="text"
+                  className="pos-form-input pos-form-emoji"
+                  value={newItem.emoji}
+                  onChange={(e) => setNewItem({ ...newItem, emoji: e.target.value })}
+                  placeholder="e.g. ☕"
+                />
+              </label>
+              <label className="pos-form-label">
+                Name
+                <input
+                  type="text"
+                  className="pos-form-input"
+                  value={newItem.name}
+                  onChange={(e) => setNewItem({ ...newItem, name: e.target.value })}
+                  placeholder="Product name"
+                />
+              </label>
+              <label className="pos-form-label">
+                Price ($)
+                <input
+                  type="number"
+                  className="pos-form-input"
+                  value={newItem.price}
+                  onChange={(e) => setNewItem({ ...newItem, price: e.target.value })}
+                  placeholder="0.00"
+                  min="0"
+                  step="0.01"
+                />
+              </label>
+              <label className="pos-form-label">
+                Category
+                <select
+                  className="pos-form-input"
+                  value={newItem.category}
+                  onChange={(e) =>
+                    setNewItem({ ...newItem, category: e.target.value as Product['category'] })
+                  }
+                >
+                  <option value="drinks">Drinks</option>
+                  <option value="food">Food</option>
+                  <option value="snacks">Snacks</option>
+                  <option value="merch">Merch</option>
+                </select>
+              </label>
+            </div>
+            <div className="pos-modal-actions">
+              <button
+                className="pos-modal-cancel"
+                onClick={() => setShowAddItem(false)}
+              >
+                Cancel
+              </button>
+              <button
+                className="pos-modal-confirm"
+                onClick={handleAddItem}
+                disabled={!newItem.name.trim() || !newItem.price || !newItem.emoji.trim()}
+              >
+                Add Item
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import type { CartItem } from '../data/products';
+import type { CartItem, CustomerType, CustomerDemographic, Product } from '../data/products';
 import {
   calcSubtotal,
   calcFoodSubtotal,
@@ -7,10 +7,14 @@ import {
   calcItemCount,
   formatCurrency,
   TAX_RATE,
+  CUSTOMER_TYPES,
+  DEMOGRAPHICS,
+  PRODUCTS,
+  CATEGORIES,
   createOrder,
   saveOrder,
 } from '../data/products';
-import { updateCustomerFromOrder } from '../data/customers';
+import { updateCustomerFromOrder, loadCustomers } from '../data/customers';
 import { useSettings } from '../contexts/useSettings';
 import './Checkout.css';
 
@@ -30,6 +34,39 @@ function Checkout({ cart, onBack, onOrderComplete }: CheckoutProps) {
   const [paymentMethod, setPaymentMethod] = useState<string>('cash');
   const [isProcessing, setIsProcessing] = useState(false);
   const [isConfirmed, setIsConfirmed] = useState(false);
+
+  // ── Customer form state ─────────────────────────
+  const [showCustomerForm, setShowCustomerForm] = useState(false);
+  const [selectedCustomerId, setSelectedCustomerId] = useState('');
+  const [customerType, setCustomerType] = useState<CustomerType>('dine-in');
+  const [customerDemographic, setCustomerDemographic] = useState<CustomerDemographic | ''>('');
+
+  const customers = useMemo(() => loadCustomers(), []);
+
+  const handleCustomerSelect = (id: string) => {
+    setSelectedCustomerId(id);
+    const c = customers.find((cust) => cust.id === id);
+    if (c) {
+      setCustomerDemographic(c.demographic);
+    }
+  };
+
+  const selectedCustomer = useMemo(
+    () => customers.find((c) => c.id === selectedCustomerId),
+    [customers, selectedCustomerId],
+  );
+
+  // ── Other items display state ───────────────────
+  const [showOtherItems, setShowOtherItems] = useState(false);
+  const [otherItemsCategory, setOtherItemsCategory] = useState<string>('All');
+
+  const otherItemsFiltered = useMemo(() => {
+    const nonFood = PRODUCTS.filter((p) => p.category !== 'food');
+    if (otherItemsCategory === 'All') return nonFood;
+    return nonFood.filter((p) => p.category === otherItemsCategory.toLowerCase());
+  }, [otherItemsCategory]);
+
+  const otherCategories = CATEGORIES.filter((c) => c !== 'All' && c !== 'Food');
 
   // Build available payment options from settings
   const ALL_PAYMENT_OPTIONS = [
@@ -70,6 +107,17 @@ function Checkout({ cart, onBack, onOrderComplete }: CheckoutProps) {
     // Simulate payment processing, then persist the order
     setTimeout(() => {
       const order = createOrder(cart, subtotal, tax, total, effectiveMethod);
+      // Attach customer info if a customer was selected
+      if (selectedCustomer) {
+        order.customerName = selectedCustomer.name;
+        order.customerType = customerType;
+        order.customerId = selectedCustomer.id;
+        if (customerDemographic) {
+          order.customerDemographic = customerDemographic;
+        } else {
+          order.customerDemographic = selectedCustomer.demographic;
+        }
+      }
       saveOrder(order);
       updateCustomerFromOrder(order);
       setIsProcessing(false);
@@ -238,6 +286,138 @@ function Checkout({ cart, onBack, onOrderComplete }: CheckoutProps) {
             <span>Grand Total</span>
             <span>{formatCurrency(total)}</span>
           </div>
+        </div>
+
+        {/* ── Customer info dropdown ──────────────── */}
+        <div className="checkout-customer">
+          <button
+            className="checkout-customer-toggle"
+            onClick={() => setShowCustomerForm(!showCustomerForm)}
+            type="button"
+          >
+            <span>{showCustomerForm ? '▾' : '▸'} Customer Info</span>
+            {selectedCustomer && !showCustomerForm && (
+              <span className="checkout-customer-preview">
+                {selectedCustomer.emoji} {selectedCustomer.name} · {customerType}
+              </span>
+            )}
+          </button>
+
+          {showCustomerForm && (
+            <div className="checkout-customer-form">
+              {/* Customer dropdown select */}
+              <div className="checkout-customer-field">
+                <label className="checkout-customer-label">Select Customer</label>
+                <select
+                  className="checkout-customer-select"
+                  value={selectedCustomerId}
+                  onChange={(e) => handleCustomerSelect(e.target.value)}
+                >
+                  <option value="">-- Walk-in Customer --</option>
+                  {customers.map((c) => (
+                    <option key={c.id} value={c.id}>
+                      {c.emoji} {c.name} ({c.visits} visits · {formatCurrency(c.totalSpent)})
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Customer type (dine-in / takeout / delivery) */}
+              <div className="checkout-customer-field">
+                <label className="checkout-customer-label">Order Type</label>
+                <div className="checkout-customer-btn-group">
+                  {CUSTOMER_TYPES.map((ct) => (
+                    <button
+                      key={ct.value}
+                      type="button"
+                      className={`checkout-customer-btn ${customerType === ct.value ? 'active' : ''}`}
+                      onClick={() => setCustomerType(ct.value)}
+                    >
+                      <span>{ct.emoji}</span>
+                      <span>{ct.label}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Customer demographic */}
+              <div className="checkout-customer-field">
+                <label className="checkout-customer-label">Demographic</label>
+                <div className="checkout-customer-btn-group">
+                  {DEMOGRAPHICS.filter((d) => d.value !== 'all').map((d) => (
+                    <button
+                      key={d.value}
+                      type="button"
+                      className={`checkout-customer-btn ${customerDemographic === d.value ? 'active' : ''}`}
+                      onClick={() =>
+                        setCustomerDemographic(
+                          customerDemographic === d.value ? '' : (d.value as CustomerDemographic),
+                        )
+                      }
+                    >
+                      <span>{d.icon}</span>
+                      <span>{d.label}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* ── Other items display ─────────────────── */}
+        <div className="checkout-customer">
+          <button
+            className="checkout-customer-toggle"
+            onClick={() => setShowOtherItems(!showOtherItems)}
+            type="button"
+          >
+            <span>{showOtherItems ? '▾' : '▸'} 🛍️ Other Items</span>
+            {!showOtherItems && (
+              <span className="checkout-customer-preview">
+                {otherItemsFiltered.length} items
+              </span>
+            )}
+          </button>
+
+          {showOtherItems && (
+            <div className="checkout-customer-form">
+              {/* Category filter */}
+              <div className="checkout-customer-field">
+                <label className="checkout-customer-label">Category</label>
+                <div className="checkout-customer-btn-group">
+                  <button
+                    type="button"
+                    className={`checkout-customer-btn ${otherItemsCategory === 'All' ? 'active' : ''}`}
+                    onClick={() => setOtherItemsCategory('All')}
+                  >
+                    All
+                  </button>
+                  {otherCategories.map((cat) => (
+                    <button
+                      key={cat}
+                      type="button"
+                      className={`checkout-customer-btn ${otherItemsCategory === cat ? 'active' : ''}`}
+                      onClick={() => setOtherItemsCategory(cat)}
+                    >
+                      {cat}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Items list */}
+              <div className="checkout-other-items-list">
+                {otherItemsFiltered.map((p: Product) => (
+                  <div key={p.id} className="checkout-other-item">
+                    <span className="checkout-other-item-emoji">{p.emoji}</span>
+                    <span className="checkout-other-item-name">{p.name}</span>
+                    <span className="checkout-other-item-price">{formatCurrency(p.price)}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
 
         {/* ── Payment method ─────────────────────── */}

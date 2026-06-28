@@ -66,6 +66,22 @@ interface NewItemForm {
 
 const EMPTY_FORM: NewItemForm = { name: '', price: '', category: 'drinks', emoji: '' };
 
+/* ---------- emoji picker groups ---------- */
+const EMOJI_GROUPS: { label: string; emojis: string[] }[] = [
+  {
+    label: '☕ Drinks',
+    emojis: ['☕', '🍵', '🧋', '🥤', '🍺', '🍻', '🍷', '🥂', '🧃', '🥛', '🫖', '🍹', '🍸', '🫗', '🧉', '🍶'],
+  },
+  {
+    label: '🍔 Food',
+    emojis: ['🍔', '🍕', '🌭', '🥪', '🌮', '🌯', '🥗', '🍝', '🍜', '🍲', '🍛', '🍣', '🍱', '🥟', '🍚', '🥩', '🍗', '🥓', '🍳', '🧇', '🥞', '🥐', '🍞', '🫔'],
+  },
+  {
+    label: '🍪 Snacks',
+    emojis: ['🍪', '🍩', '🧁', '🍰', '🎂', '🍫', '🍬', '🍭', '🧈', '🍿', '🥜', '🌰', '🥨', '🥯', '🫘', '🫛'],
+  },
+];
+
 
 interface POSDashboardProps {
   /** Called when the user clicks Checkout with a non-empty cart. */
@@ -81,6 +97,7 @@ function POSDashboard({ onCheckout }: POSDashboardProps) {
   const [staff, setStaff] = useState(loadStaff);
   const [showAddItem, setShowAddItem] = useState(false);
   const [newItem, setNewItem] = useState<NewItemForm>(EMPTY_FORM);
+  const [openEmojiGroup, setOpenEmojiGroup] = useState<string | null>(null);
 
   // Reload staff whenever a re-render picks up localStorage changes
   useEffect(() => {
@@ -165,6 +182,7 @@ function POSDashboard({ onCheckout }: POSDashboardProps) {
     PRODUCTS.push(product);
     setNewItem(EMPTY_FORM);
     setShowAddItem(false);
+    setOpenEmojiGroup(null);
   };
 
   const handleRemoveItem = (productId: string) => {
@@ -410,29 +428,57 @@ function POSDashboard({ onCheckout }: POSDashboardProps) {
 
       {/* Add New Item Modal */}
       {showAddItem && (
-        <div className="pos-modal-overlay" onClick={() => setShowAddItem(false)}>
+        <div className="pos-modal-overlay" onClick={() => { setShowAddItem(false); setOpenEmojiGroup(null); }}>
           <div className="pos-modal" onClick={(e) => e.stopPropagation()}>
             <div className="pos-modal-header">
               <h3>Add New Item</h3>
               <button
                 className="pos-modal-close"
-                onClick={() => setShowAddItem(false)}
+                onClick={() => { setShowAddItem(false); setOpenEmojiGroup(null); }}
                 aria-label="Close"
               >
                 ×
               </button>
             </div>
             <div className="pos-modal-body">
-              <label className="pos-form-label">
-                Emoji
-                <input
-                  type="text"
-                  className="pos-form-input pos-form-emoji"
-                  value={newItem.emoji}
-                  onChange={(e) => setNewItem({ ...newItem, emoji: e.target.value })}
-                  placeholder="e.g. ☕"
-                />
-              </label>
+              <div className="pos-form-label">
+                <span>Emoji</span>
+                {newItem.emoji && (
+                  <span className="pos-emoji-selected">Selected: {newItem.emoji}</span>
+                )}
+                <div className="pos-emoji-picker">
+                  {EMOJI_GROUPS.map((group) => {
+                    const isOpen = openEmojiGroup === group.label;
+                    return (
+                      <div key={group.label} className={`pos-emoji-dropdown ${isOpen ? 'open' : ''}`}>
+                        <button
+                          type="button"
+                          className="pos-emoji-dropdown-header"
+                          onClick={() => setOpenEmojiGroup(isOpen ? null : group.label)}
+                        >
+                          <span>{group.label}</span>
+                          <span className="pos-emoji-dropdown-arrow">{isOpen ? '▲' : '▼'}</span>
+                        </button>
+                        {isOpen && (
+                          <div className="pos-emoji-grid">
+                            {group.emojis.map((em) => (
+                              <button
+                                key={em}
+                                type="button"
+                                className={`pos-emoji-btn ${newItem.emoji === em ? 'active' : ''}`}
+                                onClick={() => setNewItem({ ...newItem, emoji: em })}
+                                title={em}
+                              >
+                                {em}
+                              </button>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
               <label className="pos-form-label">
                 Name
                 <input
@@ -474,7 +520,7 @@ function POSDashboard({ onCheckout }: POSDashboardProps) {
             <div className="pos-modal-actions">
               <button
                 className="pos-modal-cancel"
-                onClick={() => setShowAddItem(false)}
+                onClick={() => { setShowAddItem(false); setOpenEmojiGroup(null); }}
               >
                 Cancel
               </button>

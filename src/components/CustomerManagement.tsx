@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect } from 'react';
-import type { CustomerDemographic } from '../data/customers';
+// import type { CustomerDemographic } from '../data/customers';
 import type { Customer } from '../data/customers';
 import { loadCustomers, DEMOGRAPHICS } from '../data/customers';
 import { formatCurrency } from '../data/products';

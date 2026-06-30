@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState } from 'react';
 import type { StaffRole, StaffShift, StaffMember } from '../data/staff';
 import { STAFF_ROLES, SHIFTS, loadStaff, saveStaff } from '../data/staff';
 import './StaffManagement.css';

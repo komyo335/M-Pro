@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 import { useState} from 'react';
+=======
+import { useState } from 'react';
+>>>>>>> test-1
 import type { StaffRole, StaffShift, StaffMember } from '../data/staff';
 import { STAFF_ROLES, SHIFTS, loadStaff, saveStaff } from '../data/staff';
 import './StaffManagement.css';

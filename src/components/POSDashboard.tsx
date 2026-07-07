@@ -52,6 +52,7 @@ const MENU_ITEMS: MenuItem[] = [
   { id: 'pos', label: 'POS', icon: '🛍️' },
   { id: 'orders', label: 'Orders', icon: '📋' },
   { id: 'inventory', label: 'Inventory', icon: '📦' },
+  { id: 'staff', label: 'Staff', icon: '🧑‍💼' },
   { id: 'customers', label: 'Customers', icon: '👥' },
   { id: 'reports', label: 'Reports', icon: '📈' },
   { id: 'settings', label: 'Settings', icon: '⚙️' },
@@ -103,11 +104,6 @@ function POSDashboard({ onCheckout }: POSDashboardProps) {
   useEffect(() => {
     setStaff(loadStaff());
   }, []);
-
-  const activeStaff = useMemo(
-    () => staff.find((s) => s.status === 'active') ?? staff[0] ?? null,
-    [staff],
-  );
 
   const filteredProducts = useMemo(() => {
     if (activeCategory === 'All') return PRODUCTS;
@@ -227,22 +223,6 @@ function POSDashboard({ onCheckout }: POSDashboardProps) {
               </li>
             ))}
           </ul>
-
-          <div className="pos-menu-footer">
-            {activeStaff && (
-              <button
-                className={`pos-menu-user ${activeMenu === 'staff' ? 'active' : ''}`}
-                title={activeStaff.name}
-                onClick={() =>
-                  setActiveMenu(activeMenu === 'staff' ? 'pos' : 'staff')
-                }
-              >
-                <span className="pos-menu-avatar" aria-hidden="true">{activeStaff.emoji}</span>
-                <span className="pos-menu-label">{activeStaff.name}</span>
-                <span className={`pos-menu-status pos-menu-status--${activeStaff.status}`} />
-              </button>
-            )}
-          </div>
         </nav>
 
         {/* Content area: settings, orders, or catalog + cart */}

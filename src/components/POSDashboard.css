@@ -159,88 +159,6 @@
   transform: translateX(0);
 }
 
-/* ---- Menu footer ---- */
-.pos-menu-footer {
-  padding: 8px;
-  border-top: 1px solid var(--border);
-}
-
-.pos-menu-user {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  width: calc(100% + 6px);
-  margin: -3px;
-  padding: 9px 12px;
-  border-radius: 8px;
-  font-family: var(--sans);
-  font-size: 14px;
-  color: var(--text);
-  background: transparent;
-  border: 2px solid transparent;
-  cursor: pointer;
-  transition: background 0.15s, border-color 0.15s, color 0.15s;
-  text-align: left;
-  white-space: nowrap;
-}
-
-.pos-menu-user:hover {
-  background: var(--bg);
-  color: var(--text-h);
-  border-color: var(--border);
-}
-
-.pos-menu-user.active {
-  background: rgba(59, 130, 246, 0.08);
-  border-color: #3b82f6;
-  color: #3b82f6;
-}
-
-.pos-menu-user:focus-visible {
-  outline: 2px solid #3b82f6;
-  outline-offset: -2px;
-}
-
-.pos-menu-avatar {
-  font-size: 20px;
-  line-height: 1;
-  flex-shrink: 0;
-  width: 24px;
-  text-align: center;
-}
-
-.pos-menu-user .pos-menu-label {
-  flex: 1;
-  opacity: 1;
-  transform: none;
-  min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-/* ---- Staff status dot ---- */
-.pos-menu-status {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  flex-shrink: 0;
-}
-
-.pos-menu-status--active {
-  background: #10b981;
-  box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.25);
-}
-
-.pos-menu-status--on-break {
-  background: #f59e0b;
-  box-shadow: 0 0 0 2px rgba(245, 158, 11, 0.25);
-}
-
-.pos-menu-status--off {
-  background: #9ca3af;
-  box-shadow: 0 0 0 2px rgba(156, 163, 175, 0.25);
-}
-
 /* ---- Product catalog ---- */
 .pos-catalog {
   display: flex;
@@ -1047,10 +965,6 @@
 
   .pos-menu-icon {
     font-size: 18px;
-  }
-
-  .pos-menu-footer {
-    display: none;
   }
 
   .pos-cart {

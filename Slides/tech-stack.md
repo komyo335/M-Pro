@@ -3,52 +3,166 @@ marp: true
 paginate: true
 transition: fade
 size: 16:9
-title: Learn Programming Easily — Tech Stack
-style: |
+title: M-Pro Cafe POS
+style : | 
+
+:root {
+  --text: #6b6375;
+  --text-h: #08060d;
+  --bg: #fff;
+  --border: #e5e4e7;
+  --code-bg: #f4f3ec;
+  --accent: #aa3bff;
+  --accent-bg: rgba(170, 59, 255, 0.1);
+  --accent-border: rgba(170, 59, 255, 0.5);
+  --social-bg: rgba(244, 243, 236, 0.5);
+  --shadow:
+    rgba(0, 0, 0, 0.1) 0 10px 15px -3px, rgba(0, 0, 0, 0.05) 0 4px 6px -2px;
+
+  --sans: system-ui, 'Segoe UI', Roboto, sans-serif;
+  --heading: system-ui, 'Segoe UI', Roboto, sans-serif;
+  --mono: ui-monospace, Consolas, monospace;
+
+  font: 18px/145% var(--sans);
+  letter-spacing: 0.18px;
+  color-scheme: light dark;
+  color: var(--text);
+  background: var(--bg);
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+
+  @media (max-width: 1024px) {
+    font-size: 16px;
+  }
+}
+
+@media (prefers-color-scheme: dark) {
   :root {
-    --paper: #FAF5EA;
-    --paper-2: #F3ECDC;
-    --ink: #2B2622;
-    --ink-soft: #5C5247;
-    --brick: #B0432B;
-    --line: #E2D7C2;
+    --text: #9ca3af;
+    --text-h: #f3f4f6;
+    --bg: #16171d;
+    --border: #2e303a;
+    --code-bg: #1f2028;
+    --accent: #c084fc;
+    --accent-bg: rgba(192, 132, 252, 0.15);
+    --accent-border: rgba(192, 132, 252, 0.5);
+    --social-bg: rgba(47, 48, 58, 0.5);
+    --shadow:
+      rgba(0, 0, 0, 0.4) 0 10px 15px -3px, rgba(0, 0, 0, 0.25) 0 4px 6px -2px;
   }
-  section {
-    background: var(--paper);
-    color: var(--ink);
-    font-family: -apple-system, "Segoe UI", Helvetica, Arial, sans-serif;
-    font-size: 26px;
-    line-height: 1.5;
-    padding: 64px 72px;
+
+  #social .button-icon {
+    filter: invert(1) brightness(2);
   }
-  h1, h2, h3 {
-    font-family: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
-    color: var(--ink);
-    letter-spacing: -0.01em;
+}
+
+/* ── User-controlled theme (overrides system preference) ─── */
+
+[data-theme="dark"] {
+  --text: #9ca3af;
+  --text-h: #f3f4f6;
+  --bg: #16171d;
+  --border: #2e303a;
+  --code-bg: #1f2028;
+  --accent: #c084fc;
+  --accent-bg: rgba(192, 132, 252, 0.15);
+  --accent-border: rgba(192, 132, 252, 0.5);
+  --social-bg: rgba(47, 48, 58, 0.5);
+  --shadow:
+    rgba(0, 0, 0, 0.4) 0 10px 15px -3px, rgba(0, 0, 0, 0.25) 0 4px 6px -2px;
+}
+
+[data-theme="light"] {
+  --text: #6b6375;
+  --text-h: #08060d;
+  --bg: #fff;
+  --border: #e5e4e7;
+  --code-bg: #f4f3ec;
+  --accent: #aa3bff;
+  --accent-bg: rgba(170, 59, 255, 0.1);
+  --accent-border: rgba(170, 59, 255, 0.5);
+  --social-bg: rgba(244, 243, 236, 0.5);
+  --shadow:
+    rgba(0, 0, 0, 0.1) 0 10px 15px -3px, rgba(0, 0, 0, 0.05) 0 4px 6px -2px;
+}
+
+/* ── User-controlled font size ─────────────────────────── */
+
+[data-font-size="small"] {
+  font-size: 15px;
+}
+
+[data-font-size="medium"] {
+  font-size: 18px;
+}
+
+[data-font-size="large"] {
+  font-size: 21px;
+}
+
+#root {
+  width: 1126px;
+  max-width: 100%;
+  margin: 0 auto;
+  text-align: center;
+  border-inline: 1px solid var(--border);
+  min-height: 100svh;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+}
+
+h1,
+h2 {
+  font-family: var(--heading);
+  font-weight: 500;
+  color: var(--text-h);
+}
+
+h1 {
+  font-size: 56px;
+  letter-spacing: -1.68px;
+  margin: 32px 0;
+  @media (max-width: 1024px) {
+    font-size: 36px;
+    margin: 20px 0;
   }
-  h1 { font-size: 60px; line-height: 1.05; margin: 0 0 .2em; }
-  h2 { font-size: 40px; margin: 0 0 .5em; }
-  h2::after {
-    content: ""; display: block; width: 64px; height: 4px;
-    background: var(--brick); margin-top: 14px; border-radius: 2px;
+}
+h2 {
+  font-size: 24px;
+  line-height: 118%;
+  letter-spacing: -0.24px;
+  margin: 0 0 8px;
+  @media (max-width: 1024px) {
+    font-size: 20px;
   }
-  strong { color: var(--brick); }
-  a { color: var(--brick); text-decoration: none; }
-  table { font-size: 22px; border-collapse: collapse; }
-  th { background: var(--paper-2); text-align: left; }
-  th, td { border: 1px solid var(--line); padding: 8px 14px; }
-  code {
-    background: var(--paper-2); color: var(--brick);
-    padding: 1px 7px; border-radius: 5px; font-size: 0.85em;
-  }
-  ul { margin-top: .2em; }
-  li { margin: .25em 0; }
-  section.dark { background: #211D1A; color: #F3ECDC; }
-  section.dark h1, section.dark h2, section.dark h3 { color: #F3ECDC; }
-  section.dark strong { color: #E0795F; }
-  section.dark a { color: #E0795F; }
-  footer, header { color: var(--ink-soft); }
-  section::after { color: var(--ink-soft); }
+}
+p {
+  margin: 0;
+}
+
+code,
+.counter {
+  font-family: var(--mono);
+  display: inline-flex;
+  border-radius: 4px;
+  color: var(--text-h);
+}
+
+code {
+  font-size: 15px;
+  line-height: 135%;
+  padding: 4px 8px;
+  background: var(--code-bg);
+}
+
+
 ---
 
 <!-- _class: lead -->
@@ -56,7 +170,7 @@ style: |
 
 <span class="tag">Tech Stack</span>
 
-# Learn Programming Easily
+# M-Pro Cafe POS 
 
 ### How it's built — stack, agents, skills, methodology
 
@@ -66,14 +180,8 @@ style: |
 
 | Layer | Technology |
 |---|---|
-| **Framework** | Next.js 16 (App Router, SSG) |
-| **UI** | React 19, Tailwind CSS v4 |
-| **Language** | TypeScript |
-| **Database** | PostgreSQL + Prisma 7 |
-| **Auth** | Auth.js v5 (credentials, bcrypt + JWT) |
-| **Content** | Data stored in Db as markdown|
-| **Search** | Fuse.js (client-side, Cmd+K) |
-| **Syntax Highlighting** | Shiki (light + dark themes) |
+
+| **Language** | TypeScript, Javascript |
 | **Testing** | Vitest |
 | **Deployment** | Vercel |
 
@@ -83,38 +191,36 @@ style: |
 
 | Agent | Model | Purpose |
 |---|---|---|
-| **test-runner** | Haiku | Runs Vitest suite, returns terse pass/fail summary |
-| **Claude Code** | Opus | Main coding agent — implements features from spec |
-
-- `test-runner` lives at `.claude/agents/test-runner.md`
-- Fires automatically when tests need to be verified
-- Keeps main-thread context free by delegating test output
-
+| **mcp-data-implementer** | sonnet |Implement the data for the project need |
+-  lives at `.claude/agents/mcp-data-implementer.md`
+-  Automatically implement the data throungh MCP server
 ---
 
 ## Skills
 
 | Skill | Purpose |
 |---|---|
-| **test-feature** | TDD discipline — every feature with logic gets a Vitest test before "done" |
+| **M-Pro** |Make record and  data structure of the Project |
 
-- Lives at `.claude/skills/test-feature/SKILL.md`
-- **Trigger:** When implementing or changing any feature with testable logic
-- **Command:** `/test-feature` or invoked automatically during feature work
-- **Steps:** Name behavior → Write test (red) → Implement → Run full suite (green)
+- Lives at `.claude/skills/M-Pro/SKILL.md`
+- **Trigger:** Generate, refine, or get inspiration for UI components via 21st.dev
+- **Command:** `/21st` or invoked automatically during feature work
+- **Steps:** Name behavior →Generate UI → Implement → Run full suite
 
 ---
 
 ## Methodology
+** Steps by Steps, One Feature to Another Feature **
 
-**Superpowers — Spec Driven Development (SDD)**
+```
+Plan → Execute → Verify → Ship
+```
 
-1. **Spec first** — Full architecture, DB schema, tech stack, and phased plan defined in `CLAUDE.md` and memory files before any code
-2. **Phased execution** — Each phase produces a working vertical slice (schema → rendering → admin → polish)
-3. **Traceable commits** — Every commit maps back to a documented requirement in the spec
-4. **No drift** — The spec is the single source of truth; implementation stays aligned with design intent
+- Break work into small, shippable phases
+- Each phase = one commit, one working feature
+- Verify before moving on — no accumulating bugs
+- Ship to Vercel after every phase — always deployable
 
-> Architecture before code. Requirements before implementation.
 
 ---
 
@@ -122,8 +228,9 @@ style: |
 
 | MCP Server | What it does |
 |---|---|
-| **Context7** (`@upstash/context7-mcp`) | Fetches live, up-to-date library docs (Next.js, Prisma, Auth.js, Tailwind) during implementation |
-| **21st.dev Magic** (`@21st-dev/magic`) | Generates and refines UI components from the 21st.dev component library |
+| **Context7** |addressing the issue of LLMs relying on outdated information |
+| **Magic**  | Generates and refines UI components |
+|**Context-awesome** | Accessing  to a wealth of high-quality, community-curated resources |
 
 - Configured in `.mcp.json`
 - Used throughout development to avoid outdated API assumptions
@@ -134,21 +241,19 @@ style: |
 
 | What | Trigger | Command |
 |---|---|---|
-| **test-feature skill** | Feature with logic is being implemented | `/test-feature` |
-| **test-runner agent** | Need to verify tests quickly | "Run the tests" |
-| **Context7 MCP** | Need docs for a library | Auto-resolved by Claude Code |
-| **21st.dev MCP** | Need a UI component | Auto-resolved by Claude Code |
+| **/21st** |Generate, refine, or get inspiration for UI components via 21st.dev | `/21st'` |
+| **Context7 MCP** | Need docs for a library | Auto-resolved |
 
 ---
 
 <!-- _class: dark -->
 
-## Summary
+# The Result
 
-**Stack:** Next.js 16 · React 19 · TypeScript · Tailwind v4 · PostgreSQL · Prisma 7 · Auth.js v5 · Shiki · Fuse.js
+**A working app in days, not months.**
 
-**AI Workflow:** Spec Driven Development → Context7 docs → 21st.dev components → test-feature TDD → test-runner verification
+- steps by steps from zero to deployed
+- 2 agents with clear responsibilities
+- Always shippable, always deployable
 
-**Result:** A fast, beautiful, self-hosted programming blog CMS.
-
-**Live:** `https://articles.htunaungkyaw.online`
+**Live: ** https://m-pro-git-main-myo335074-6768s-projects.vercel.app

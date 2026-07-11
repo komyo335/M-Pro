@@ -1,19 +1,35 @@
-# Team {{TEAM_ID}} — User Interview Notes
+<!-- User-interview template. Copy to your repo (e.g. feedback/interview-notes.md), fill, link in report.md.
+     Use ONE of: interview / feedback / open-issues. This one = you talked to a real user. -->
 
-> Chapter 4. The team interviews the chosen relative (the real user). 15-20 min, informal.
-> Fold at least one finding back into `spec.md` Definition of Done.
+# User Interview — AI Project Idea Scorer
 
-## Who + when
-- **User:**
-- **Date:**
-- **Interviewed by:**
+- **Who:** Kyaw Zin Moe (friend)
+- **When:** 10/07/2026
+- **How:** in person, ~15 min
 
-## What we asked + heard
-<!-- 5-8 bullets. Real quotes are gold. -->
-- What do you do today without this?
-- What's still missing / confusing?
-- What would make you actually use it?
+## What they do today (without your project)
 
-## Findings folded into DOD
-<!-- At least one. Link to the spec.md DOD line you added/changed. -->
--
+Check the project score — they make record on paper manually without analysis financial data.
+
+## What they liked
+
+- Analysing the record data 
+- Reports are useful as financial documents
+- Making orders easily throungh the apps
+
+## What confused them / what's missing
+
+- Recording Customer Feature is still in demo
+- The apps can run only for few user 
+
+
+## What would make them actually use it
+
+- Report Component for checking financial data
+- Making Orders through the Apps
+- Checkout Component for daily orders
+
+## What I'll change (next steps)
+
+- [ ] Staff Management Feature
+- [ ] Database on Local to cloud server

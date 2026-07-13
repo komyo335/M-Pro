@@ -1,7 +1,6 @@
 ---
 marp: true
 paginate: true
-transition: fade
 size: 16:9
 title: M-Pro Cafe POS
 style: | 
@@ -150,7 +149,9 @@ code {
 
 <span class="tag">Tech Stack</span>
 
-# M-Pro Cafe POS 
+# Tech Stack
+
+### M-Pro Cafe POS 
 
 ### How it's built — stack, agents, skills, methodology
 

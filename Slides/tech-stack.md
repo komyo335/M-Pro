@@ -5,7 +5,7 @@ transition: fade
 size: 16:9
 title: M-Pro Cafe POS
 style: | 
-:root {
+  :root {
   --text: #6b6375;
   --text-h: #08060d;
   --bg: #fff;

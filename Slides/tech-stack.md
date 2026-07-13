@@ -3,7 +3,8 @@ marp: true
 paginate: true
 size: 16:9
 title: M-Pro Cafe POS
-style: | 
+---
+<style> 
   :root {
   --text: #6b6375;
   --text-h: #08060d;
@@ -141,13 +142,11 @@ code {
   padding: 4px 8px;
   background: var(--code-bg);
 }
-
----
+</style>
 
 <!-- _class: lead -->
 <!-- _paginate: false -->
 
-<span class="tag">Tech Stack</span>
 
 # Tech Stack
 

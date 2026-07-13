@@ -4,7 +4,7 @@ paginate: true
 transition: fade
 size: 16:9
 title: M-Pro Cafe POS
-style : | 
+style: | 
 :root {
   --text: #6b6375;
   --text-h: #08060d;

@@ -1,16 +1,17 @@
 import { useMemo, useState } from 'react';
-import type { CartItem } from '../data/products';
+import type { CartItem, CustomerType, CustomerDemographic } from '../data/products';
 import {
   calcSubtotal,
-  calcFoodSubtotal,
   calcTax,
   calcItemCount,
   formatCurrency,
   TAX_RATE,
+  CUSTOMER_TYPES,
+  DEMOGRAPHICS,
   createOrder,
   saveOrder,
 } from '../data/products';
-import { updateCustomerFromOrder } from '../data/customers';
+import { updateCustomerFromOrder, loadCustomers } from '../data/customers';
 import { useSettings } from '../contexts/useSettings';
 import './Checkout.css';
 
@@ -30,6 +31,32 @@ function Checkout({ cart, onBack, onOrderComplete }: CheckoutProps) {
   const [paymentMethod, setPaymentMethod] = useState<string>('cash');
   const [isProcessing, setIsProcessing] = useState(false);
   const [isConfirmed, setIsConfirmed] = useState(false);
+  const [showReceipt, setShowReceipt] = useState(false);
+
+  // ── Customer form state ─────────────────────────
+  const [showCustomerForm, setShowCustomerForm] = useState(false);
+  const [selectedCustomerId, setSelectedCustomerId] = useState('');
+  const [customerName, setCustomerName] = useState('');
+  const [customerType, setCustomerType] = useState<CustomerType>('dine-in');
+  const [customerDemographic, setCustomerDemographic] = useState<CustomerDemographic | ''>('');
+
+  const customers = useMemo(() => loadCustomers(), []);
+
+  const handleCustomerSelect = (id: string) => {
+    setSelectedCustomerId(id);
+    const c = customers.find((cust) => cust.id === id);
+    if (c) {
+      setCustomerName(c.name);
+      setCustomerDemographic(c.demographic);
+    } else {
+      setCustomerName('');
+    }
+  };
+
+  const selectedCustomer = useMemo(
+    () => customers.find((c) => c.id === selectedCustomerId),
+    [customers, selectedCustomerId],
+  );
 
   // Build available payment options from settings
   const ALL_PAYMENT_OPTIONS = [
@@ -49,20 +76,9 @@ function Checkout({ cart, onBack, onOrderComplete }: CheckoutProps) {
 
   // ── Calculations ──────────────────────────────────
   const subtotal = useMemo(() => calcSubtotal(cart), [cart]);
-  const foodSubtotal = useMemo(() => calcFoodSubtotal(cart), [cart]);
   const tax = useMemo(() => calcTax(subtotal), [subtotal]);
   const total = subtotal + tax;
   const itemCount = useMemo(() => calcItemCount(cart), [cart]);
-
-  // Group food items to "combine" pricing as the user requested
-  const foodItems = useMemo(
-    () => cart.filter((item) => item.product.category === 'food'),
-    [cart],
-  );
-  const nonFoodItems = useMemo(
-    () => cart.filter((item) => item.product.category !== 'food'),
-    [cart],
-  );
 
   const handleConfirm = () => {
     if (cart.length === 0) return;
@@ -70,6 +86,19 @@ function Checkout({ cart, onBack, onOrderComplete }: CheckoutProps) {
     // Simulate payment processing, then persist the order
     setTimeout(() => {
       const order = createOrder(cart, subtotal, tax, total, effectiveMethod);
+      // Attach customer info
+      order.customerType = customerType;
+      if (selectedCustomer) {
+        order.customerName = selectedCustomer.name;
+        order.customerId = selectedCustomer.id;
+        if (customerDemographic) {
+          order.customerDemographic = customerDemographic;
+        } else {
+          order.customerDemographic = selectedCustomer.demographic;
+        }
+      } else if (customerName.trim()) {
+        order.customerName = customerName.trim();
+      }
       saveOrder(order);
       updateCustomerFromOrder(order);
       setIsProcessing(false);
@@ -101,9 +130,6 @@ function Checkout({ cart, onBack, onOrderComplete }: CheckoutProps) {
             </p>
             <div className="checkout-confirm-details">
               <span>{itemCount} item{itemCount !== 1 ? 's' : ''}</span>
-              {foodSubtotal > 0 && (
-                <span>Food total: {formatCurrency(foodSubtotal)}</span>
-              )}
             </div>
             <button className="checkout-btn checkout-btn-primary" onClick={handleDone}>
               Back to Dashboard
@@ -151,85 +177,12 @@ function Checkout({ cart, onBack, onOrderComplete }: CheckoutProps) {
           </span>
         </header>
 
-        {/* Bill / receipt body */}
-        <div className="checkout-body">
-          {/* ── Food section (combined pricing) ────── */}
-          {foodItems.length > 0 && (
-            <section className="checkout-section checkout-food">
-              <h3 className="checkout-section-title">
-                🍽️ Food Items — Combined Price
-              </h3>
-              <ul className="checkout-item-list">
-                {foodItems.map((item) => (
-                  <li key={item.product.id} className="checkout-item">
-                    <span className="checkout-item-emoji" aria-hidden="true">
-                      {item.product.emoji}
-                    </span>
-                    <div className="checkout-item-info">
-                      <span className="checkout-item-name">
-                        {item.product.name}
-                      </span>
-                      <span className="checkout-item-unit">
-                        {formatCurrency(item.product.price)} each
-                      </span>
-                    </div>
-                    <span className="checkout-item-qty">×{item.quantity}</span>
-                    <span className="checkout-item-line-total">
-                      {formatCurrency(item.product.price * item.quantity)}
-                    </span>
-                  </li>
-                ))}
-              </ul>
-              <div className="checkout-category-subtotal">
-                <span>Food Combined Total</span>
-                <span>{formatCurrency(foodSubtotal)}</span>
-              </div>
-            </section>
-          )}
-
-          {/* ── Non-food section ──────────────────── */}
-          {nonFoodItems.length > 0 && (
-            <section className="checkout-section checkout-other">
-              <h3 className="checkout-section-title">
-                🛍️ Other Items
-              </h3>
-              <ul className="checkout-item-list">
-                {nonFoodItems.map((item) => (
-                  <li key={item.product.id} className="checkout-item">
-                    <span className="checkout-item-emoji" aria-hidden="true">
-                      {item.product.emoji}
-                    </span>
-                    <div className="checkout-item-info">
-                      <span className="checkout-item-name">
-                        {item.product.name}
-                      </span>
-                      <span className="checkout-item-unit">
-                        {formatCurrency(item.product.price)} each
-                      </span>
-                    </div>
-                    <span className="checkout-item-qty">×{item.quantity}</span>
-                    <span className="checkout-item-line-total">
-                      {formatCurrency(item.product.price * item.quantity)}
-                    </span>
-                  </li>
-                ))}
-              </ul>
-            </section>
-          )}
-        </div>
-
         {/* ── Totals ─────────────────────────────── */}
         <div className="checkout-totals">
           <div className="checkout-totals-row">
             <span>Subtotal</span>
             <span>{formatCurrency(subtotal)}</span>
           </div>
-          {foodSubtotal > 0 && (
-            <div className="checkout-totals-row checkout-totals-food">
-              <span>↳ of which Food</span>
-              <span>{formatCurrency(foodSubtotal)}</span>
-            </div>
-          )}
           <div className="checkout-totals-row">
             <span>Tax ({(TAX_RATE * 100).toFixed(0)}%)</span>
             <span>{formatCurrency(tax)}</span>
@@ -238,6 +191,222 @@ function Checkout({ cart, onBack, onOrderComplete }: CheckoutProps) {
             <span>Grand Total</span>
             <span>{formatCurrency(total)}</span>
           </div>
+        </div>
+
+        {/* ── Customer info dropdown ──────────────── */}
+        <div className="checkout-customer">
+          <button
+            className="checkout-customer-toggle"
+            onClick={() => setShowCustomerForm(!showCustomerForm)}
+            type="button"
+          >
+            <span>{showCustomerForm ? '▾' : '▸'} Customer Info</span>
+            {selectedCustomer && !showCustomerForm && (
+              <span className="checkout-customer-preview">
+                {selectedCustomer.emoji} {selectedCustomer.name} · {customerType}
+              </span>
+            )}
+          </button>
+
+          {/* Customer summary card */}
+          {selectedCustomer && (
+            <div className="checkout-customer-summary">
+              <div className="checkout-customer-summary-header">
+                <span className="checkout-customer-summary-name">
+                  {selectedCustomer.emoji} {selectedCustomer.name}
+                </span>
+                <span className="checkout-customer-summary-type">
+                  {CUSTOMER_TYPES.find((ct) => ct.value === customerType)?.emoji}{' '}
+                  {CUSTOMER_TYPES.find((ct) => ct.value === customerType)?.label}
+                </span>
+              </div>
+              {cart.length > 0 && (
+                <ul className="checkout-customer-summary-items">
+                  {cart.map((item) => (
+                    <li key={item.product.id} className="checkout-customer-summary-item">
+                      <span className="checkout-customer-summary-item-emoji">
+                        {item.product.emoji}
+                      </span>
+                      <span className="checkout-customer-summary-item-name">
+                        {item.product.name}
+                      </span>
+                      <span className="checkout-customer-summary-item-price">
+                        {formatCurrency(item.product.price * item.quantity)}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          )}
+
+          {showCustomerForm && (
+            <div className="checkout-customer-form">
+              {/* Customer name */}
+              <div className="checkout-customer-field">
+                <label className="checkout-customer-label">Customer Name</label>
+                <input
+                  type="text"
+                  className="checkout-customer-input"
+                  placeholder="Enter customer name"
+                  value={selectedCustomer ? selectedCustomer.name : customerName}
+                  onChange={(e) => setCustomerName(e.target.value)}
+                  readOnly={!!selectedCustomer}
+                />
+              </div>
+
+              {/* Customer dropdown select */}
+              <div className="checkout-customer-field">
+                <label className="checkout-customer-label">Select Customer</label>
+                <select
+                  className="checkout-customer-select"
+                  value={selectedCustomerId}
+                  onChange={(e) => handleCustomerSelect(e.target.value)}
+                >
+                  <option value="">-- Walk-in Customer --</option>
+                  {customers.map((c) => (
+                    <option key={c.id} value={c.id}>
+                      {c.emoji} {c.name} ({c.visits} visits · {formatCurrency(c.totalSpent)})
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Customer type (dine-in / takeout / delivery) */}
+              <div className="checkout-customer-field">
+                <label className="checkout-customer-label">Order Type</label>
+                <div className="checkout-customer-btn-group">
+                  {CUSTOMER_TYPES.map((ct) => (
+                    <button
+                      key={ct.value}
+                      type="button"
+                      className={`checkout-customer-btn ${customerType === ct.value ? 'active' : ''}`}
+                      onClick={() => setCustomerType(ct.value)}
+                    >
+                      <span>{ct.emoji}</span>
+                      <span>{ct.label}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Customer demographic */}
+              <div className="checkout-customer-field">
+                <label className="checkout-customer-label">Demographic</label>
+                <div className="checkout-customer-btn-group">
+                  {DEMOGRAPHICS.filter((d) => d.value !== 'all').map((d) => (
+                    <button
+                      key={d.value}
+                      type="button"
+                      className={`checkout-customer-btn ${customerDemographic === d.value ? 'active' : ''}`}
+                      onClick={() =>
+                        setCustomerDemographic(
+                          customerDemographic === d.value ? '' : (d.value as CustomerDemographic),
+                        )
+                      }
+                    >
+                      <span>{d.icon}</span>
+                      <span>{d.label}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* ── Receipt body ─────────────────────────── */}
+        <div className="checkout-receipt">
+          <button
+            className="checkout-receipt-toggle"
+            onClick={() => setShowReceipt(!showReceipt)}
+            type="button"
+          >
+            <span>{showReceipt ? '▾' : '▸'} 🧾 Receipt</span>
+            {!showReceipt && (
+              <span className="checkout-receipt-preview">
+                {itemCount} item{itemCount !== 1 ? 's' : ''} · {formatCurrency(total)}
+              </span>
+            )}
+          </button>
+
+          {showReceipt && (
+            <div className="checkout-receipt-body">
+              <div className="checkout-receipt-header">
+                <span className="checkout-receipt-store">M-Pro</span>
+                <span className="checkout-receipt-date">
+                  {new Date().toLocaleDateString('en-US', {
+                    weekday: 'short',
+                    year: 'numeric',
+                    month: 'short',
+                    day: 'numeric',
+                  })}
+                </span>
+                <span className="checkout-receipt-time">
+                  {new Date().toLocaleTimeString('en-US', {
+                    hour: '2-digit',
+                    minute: '2-digit',
+                  })}
+                </span>
+              </div>
+
+              <div className="checkout-receipt-divider" />
+
+              <ul className="checkout-receipt-items">
+                {cart.map((item) => (
+                  <li key={item.product.id} className="checkout-receipt-item">
+                    <span className="checkout-receipt-item-qty">{item.quantity}×</span>
+                    <span className="checkout-receipt-item-emoji">{item.product.emoji}</span>
+                    <span className="checkout-receipt-item-name">{item.product.name}</span>
+                    <span className="checkout-receipt-item-price">
+                      {formatCurrency(item.product.price * item.quantity)}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+
+              <div className="checkout-receipt-divider" />
+
+              <div className="checkout-receipt-totals">
+                <div className="checkout-receipt-row">
+                  <span>Subtotal</span>
+                  <span>{formatCurrency(subtotal)}</span>
+                </div>
+                <div className="checkout-receipt-row">
+                  <span>Tax ({(TAX_RATE * 100).toFixed(0)}%)</span>
+                  <span>{formatCurrency(tax)}</span>
+                </div>
+                <div className="checkout-receipt-row checkout-receipt-grand">
+                  <span>Total</span>
+                  <span>{formatCurrency(total)}</span>
+                </div>
+              </div>
+
+              <div className="checkout-receipt-divider" />
+
+              <div className="checkout-receipt-footer">
+                {selectedCustomer && (
+                  <div className="checkout-receipt-row">
+                    <span>Customer</span>
+                    <span>{selectedCustomer.emoji} {selectedCustomer.name}</span>
+                  </div>
+                )}
+                <div className="checkout-receipt-row">
+                  <span>Type</span>
+                  <span>
+                    {CUSTOMER_TYPES.find((ct) => ct.value === customerType)?.emoji}{' '}
+                    {CUSTOMER_TYPES.find((ct) => ct.value === customerType)?.label}
+                  </span>
+                </div>
+                <div className="checkout-receipt-row">
+                  <span>Payment</span>
+                  <span>
+                    {effectiveMethod === 'cash' ? '💵 Cash' : effectiveMethod === 'card' ? '💳 Card' : '📱 Mobile'}
+                  </span>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* ── Payment method ─────────────────────── */}

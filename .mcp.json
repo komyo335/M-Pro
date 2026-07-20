@@ -18,6 +18,17 @@
       "command": "magic",
       "args": [],
       "env": {}
+    },
+    "chrome-devtools": {
+      "type": "stdio",
+      "command": "npx",
+      "args": [
+        "-y",
+        "chrome-devtools-mcp@latest",
+        "--headless",
+        "--no-usage-statistics"
+      ],
+      "env": {}
     }
   }
 }

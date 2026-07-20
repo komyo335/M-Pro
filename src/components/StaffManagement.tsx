@@ -1,11 +1,22 @@
 <<<<<<< HEAD
+<<<<<<< HEAD
 import { useState} from 'react';
 =======
 import { useState } from 'react';
 >>>>>>> test-1
 import type { StaffRole, StaffShift, StaffMember } from '../data/staff';
+=======
+import { useState } from 'react';
+import type { StaffMember, StaffRole, StaffShift } from '../data/staff';
+>>>>>>> dev-1
 import { STAFF_ROLES, SHIFTS, loadStaff, saveStaff } from '../data/staff';
 import './StaffManagement.css';
+
+const STATUS_LABELS: Record<string, string> = {
+  active: '🟢 Active',
+  'on-break': '🟡 On Break',
+  off: '⚫ Off',
+};
 
 const ROLE_EMOJIS: Record<StaffRole, string> = {
   manager: '👔',
@@ -13,12 +24,6 @@ const ROLE_EMOJIS: Record<StaffRole, string> = {
   cashier: '💳',
   server: '🍽️',
   chef: '👨‍🍳',
-};
-
-const STATUS_LABELS: Record<string, string> = {
-  active: '🟢 Active',
-  'on-break': '🟡 On Break',
-  off: '⚫ Off',
 };
 
 const EMPTY_FORM = {
@@ -35,7 +40,7 @@ function StaffManagement() {
   const [newUser, setNewUser] = useState(EMPTY_FORM);
   const [formError, setFormError] = useState<string | null>(null);
 
-  const handleCreateAdmin = () => {
+  const handleCreateStaff = () => {
     if (!newUser.name.trim()) {
       setFormError('Name is required.');
       return;
@@ -56,7 +61,7 @@ function StaffManagement() {
       hireDate: new Date().toISOString().split('T')[0],
       emoji: ROLE_EMOJIS[newUser.role],
       ordersHandled: 0,
-      notes: 'New admin created via Admin Management.',
+      notes: '',
     };
 
     const updated = [...staff, newMember];
@@ -68,8 +73,8 @@ function StaffManagement() {
     setFormError(null);
   };
 
-  const handleDeleteAdmin = (id: string) => {
-    if (!window.confirm('Remove this admin? This cannot be undone.')) return;
+  const handleDeleteStaff = (id: string) => {
+    if (!window.confirm('Remove this staff member? This cannot be undone.')) return;
     const updated = staff.filter((s) => s.id !== id);
     saveStaff(updated);
     setStaff(updated);
@@ -85,80 +90,89 @@ function StaffManagement() {
     <div className="staff-mgmt">
       {/* ── Header ────────────────────────────────────── */}
       <header className="staff-header">
-        <h2>Admin Management</h2>
+        <h2>Staff Management</h2>
         <p className="staff-subtitle">
           Manage employee profiles, shifts, and performance across your team.
         </p>
       </header>
 
-      {/* ── Add User Section ──────────────────────────── */}
+      {/* ── Add Staff Button / Form ────────────────────── */}
       <div className="staff-add-section">
         {!showForm ? (
           <button className="staff-add-btn" onClick={() => setShowForm(true)}>
             <span className="staff-add-btn-icon" aria-hidden="true">➕</span>
-            Add Admin
+            Add Staff
           </button>
         ) : (
           <div className="staff-add-form">
-            <h3>Create New Admin</h3>
+            <h3>New Staff Member</h3>
+
             <div className="staff-form-grid">
               <div className="staff-form-field">
-                <label htmlFor="staff-name">Name</label>
+                <label className="staff-form-label">Name</label>
                 <input
-                  id="staff-name"
                   type="text"
+                  className="staff-form-input"
                   placeholder="Full name"
                   value={newUser.name}
                   onChange={(e) => { setNewUser({ ...newUser, name: e.target.value }); setFormError(null); }}
                 />
               </div>
               <div className="staff-form-field">
-                <label htmlFor="staff-email">Email</label>
+                <label className="staff-form-label">Email</label>
                 <input
-                  id="staff-email"
                   type="email"
+                  className="staff-form-input"
                   placeholder="email@example.com"
                   value={newUser.email}
                   onChange={(e) => { setNewUser({ ...newUser, email: e.target.value }); setFormError(null); }}
                 />
               </div>
               <div className="staff-form-field">
-                <label htmlFor="staff-phone">Phone</label>
+                <label className="staff-form-label">Phone</label>
                 <input
-                  id="staff-phone"
                   type="tel"
+                  className="staff-form-input"
                   placeholder="(555) 123-4567"
                   value={newUser.phone}
                   onChange={(e) => setNewUser({ ...newUser, phone: e.target.value })}
                 />
               </div>
-              <div className="staff-form-field">
-                <label htmlFor="staff-role">Role</label>
-                <select
-                  id="staff-role"
-                  value={newUser.role}
-                  onChange={(e) => setNewUser({ ...newUser, role: e.target.value as StaffRole })}
-                >
-                  {STAFF_ROLES.filter((r) => r.value !== 'all').map((role) => (
-                    <option key={role.value} value={role.value}>
-                      {role.icon} {role.label}
-                    </option>
-                  ))}
-                </select>
+            </div>
+
+            {/* Role selection */}
+            <div className="staff-form-field">
+              <label className="staff-form-label">Role</label>
+              <div className="staff-form-btn-group">
+                {STAFF_ROLES.filter((r) => r.value !== 'all').map((role) => (
+                  <button
+                    key={role.value}
+                    type="button"
+                    className={`staff-form-btn ${newUser.role === role.value ? 'active' : ''}`}
+                    onClick={() => setNewUser({ ...newUser, role: role.value as StaffRole })}
+                  >
+                    <span>{role.icon}</span>
+                    <span>{role.label}</span>
+                  </button>
+                ))}
               </div>
-              <div className="staff-form-field">
-                <label htmlFor="staff-shift">Shift</label>
-                <select
-                  id="staff-shift"
-                  value={newUser.shift}
-                  onChange={(e) => setNewUser({ ...newUser, shift: e.target.value as StaffShift })}
-                >
-                  {SHIFTS.map((shift) => (
-                    <option key={shift.value} value={shift.value}>
-                      {shift.icon} {shift.label} ({shift.hours})
-                    </option>
-                  ))}
-                </select>
+            </div>
+
+            {/* Shift selection */}
+            <div className="staff-form-field">
+              <label className="staff-form-label">Shift</label>
+              <div className="staff-form-btn-group">
+                {SHIFTS.map((shift) => (
+                  <button
+                    key={shift.value}
+                    type="button"
+                    className={`staff-form-btn ${newUser.shift === shift.value ? 'active' : ''}`}
+                    onClick={() => setNewUser({ ...newUser, shift: shift.value as StaffShift })}
+                  >
+                    <span>{shift.icon}</span>
+                    <span>{shift.label}</span>
+                  </button>
+                ))}
               </div>
             </div>
 
@@ -167,8 +181,8 @@ function StaffManagement() {
             )}
 
             <div className="staff-form-actions">
-              <button className="staff-form-submit" onClick={handleCreateAdmin}>
-                ✓ Create Admin
+              <button className="staff-form-submit" onClick={handleCreateStaff}>
+                ✓ Create Staff
               </button>
               <button className="staff-form-cancel" onClick={handleCancel}>
                 ✕ Cancel
@@ -178,11 +192,11 @@ function StaffManagement() {
         )}
       </div>
 
-      {/* ── Admin List ────────────────────────────────── */}
+      {/* ── Staff List ────────────────────────────────── */}
       <div className="staff-list">
-        <h3 className="staff-list-title">All Admins ({staff.length})</h3>
+        <h3 className="staff-list-title">All Staff ({staff.length})</h3>
         {staff.length === 0 ? (
-          <p className="staff-list-empty">No admins yet. Create one above.</p>
+          <p className="staff-list-empty">No staff members found.</p>
         ) : (
           <div className="staff-list-grid">
             {staff.map((member) => (
@@ -197,9 +211,9 @@ function StaffManagement() {
                   </div>
                   <button
                     className="staff-card-delete"
-                    onClick={() => handleDeleteAdmin(member.id)}
+                    onClick={() => handleDeleteStaff(member.id)}
                     aria-label={`Remove ${member.name}`}
-                    title="Remove admin"
+                    title="Remove staff member"
                   >
                     ×
                   </button>

@@ -24,6 +24,217 @@
   color: var(--text);
 }
 
+/* ---- Add Staff Section ---- */
+.staff-add-section {
+  display: flex;
+  justify-content: center;
+}
+
+.staff-add-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 24px;
+  font-size: 15px;
+  font-weight: 600;
+  font-family: var(--sans);
+  color: #fff;
+  background: linear-gradient(135deg, #3b82f6, #2563eb);
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: transform 0.15s, box-shadow 0.15s, background 0.15s;
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
+}
+
+.staff-add-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 14px rgba(59, 130, 246, 0.4);
+  background: linear-gradient(135deg, #2563eb, #1d4ed8);
+}
+
+.staff-add-btn:active {
+  transform: translateY(0);
+}
+
+.staff-add-btn:focus-visible {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+}
+
+.staff-add-btn-icon {
+  font-size: 16px;
+  line-height: 1;
+}
+
+/* ---- Staff Form ---- */
+.staff-add-form {
+  width: 100%;
+  max-width: 560px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.staff-add-form h3 {
+  margin: 0;
+  font-size: 17px;
+  font-weight: 600;
+  color: var(--text-h);
+}
+
+.staff-form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.staff-form-grid > :last-child {
+  grid-column: 1 / -1;
+}
+
+.staff-form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.staff-form-label {
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--text);
+}
+
+.staff-form-input {
+  padding: 10px 12px;
+  font-size: 14px;
+  font-family: var(--sans);
+  color: var(--text-h);
+  background: var(--bg);
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  outline: none;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.staff-form-input::placeholder {
+  color: var(--text);
+  opacity: 0.6;
+}
+
+.staff-form-input:focus {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.12);
+}
+
+/* ---- Role / Shift Button Group ---- */
+.staff-form-btn-group {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.staff-form-btn {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px 10px;
+  font-size: 12px;
+  font-weight: 500;
+  font-family: var(--sans);
+  color: var(--text);
+  background: var(--bg);
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s, color 0.15s;
+  white-space: nowrap;
+}
+
+.staff-form-btn:hover {
+  border-color: #3b82f6;
+}
+
+.staff-form-btn.active {
+  border-color: #3b82f6;
+  background: rgba(59, 130, 246, 0.08);
+  color: #3b82f6;
+  font-weight: 600;
+}
+
+.staff-form-btn span:first-child {
+  font-size: 14px;
+}
+
+/* ---- Form Error ---- */
+.staff-form-error {
+  font-size: 13px;
+  color: #ef4444;
+  margin: 0;
+  padding: 6px 10px;
+  background: rgba(239, 68, 68, 0.08);
+  border-radius: 6px;
+}
+
+/* ---- Form Actions ---- */
+.staff-form-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+  padding-top: 4px;
+}
+
+.staff-form-submit {
+  padding: 10px 20px;
+  font-size: 14px;
+  font-weight: 600;
+  font-family: var(--sans);
+  color: #fff;
+  background: #10b981;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.15s, transform 0.15s;
+}
+
+.staff-form-submit:hover {
+  background: #059669;
+  transform: translateY(-1px);
+}
+
+.staff-form-cancel {
+  padding: 10px 20px;
+  font-size: 14px;
+  font-weight: 500;
+  font-family: var(--sans);
+  color: var(--text);
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.staff-form-cancel:hover {
+  background: var(--code-bg);
+  border-color: var(--text);
+}
+
+.staff-form-submit:focus-visible,
+.staff-form-cancel:focus-visible {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+}
+
 /* ---- Stats bar ---- */
 .staff-stats {
   display: grid;
@@ -396,173 +607,7 @@
   line-height: 1.5;
 }
 
-/* ---- Add User Section ---- */
-.staff-add-section {
-  display: flex;
-  justify-content: center;
-}
-
-.staff-add-btn {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 14px 28px;
-  font-size: 16px;
-  font-weight: 600;
-  font-family: var(--sans);
-  color: #fff;
-  background: linear-gradient(135deg, #3b82f6, #2563eb);
-  border: none;
-  border-radius: 10px;
-  cursor: pointer;
-  transition: transform 0.15s, box-shadow 0.15s, background 0.15s;
-  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
-}
-
-.staff-add-btn:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 4px 14px rgba(59, 130, 246, 0.4);
-  background: linear-gradient(135deg, #2563eb, #1d4ed8);
-}
-
-.staff-add-btn:active {
-  transform: translateY(0);
-}
-
-.staff-add-btn:focus-visible {
-  outline: 2px solid #3b82f6;
-  outline-offset: 2px;
-}
-
-.staff-add-btn-icon {
-  font-size: 18px;
-  line-height: 1;
-}
-
-/* ---- Add User Form ---- */
-.staff-add-form {
-  width: 100%;
-  max-width: 600px;
-  background: var(--bg);
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  padding: 24px;
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
-}
-
-.staff-add-form h3 {
-  margin: 0;
-  font-size: 18px;
-  font-weight: 600;
-  color: var(--text-h);
-}
-
-.staff-form-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 14px;
-}
-
-.staff-form-field {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.staff-form-field label {
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--text);
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-.staff-form-field input,
-.staff-form-field select {
-  padding: 10px 12px;
-  font-size: 14px;
-  font-family: var(--sans);
-  color: var(--text-h);
-  background: var(--bg);
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  transition: border-color 0.15s, box-shadow 0.15s;
-}
-
-.staff-form-field input:focus,
-.staff-form-field select:focus {
-  outline: none;
-  border-color: #3b82f6;
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.12);
-}
-
-.staff-form-field input::placeholder {
-  color: var(--text);
-  opacity: 0.6;
-}
-
-.staff-form-actions {
-  display: flex;
-  gap: 10px;
-  justify-content: flex-end;
-}
-
-.staff-form-submit {
-  padding: 10px 22px;
-  font-size: 14px;
-  font-weight: 600;
-  font-family: var(--sans);
-  color: #fff;
-  background: #10b981;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: background 0.15s, transform 0.15s;
-}
-
-.staff-form-submit:hover {
-  background: #059669;
-  transform: translateY(-1px);
-}
-
-.staff-form-cancel {
-  padding: 10px 22px;
-  font-size: 14px;
-  font-weight: 500;
-  font-family: var(--sans);
-  color: var(--text);
-  background: var(--bg);
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  cursor: pointer;
-  transition: background 0.15s, border-color 0.15s;
-}
-
-.staff-form-cancel:hover {
-  background: var(--code-bg);
-  border-color: var(--text);
-}
-
-.staff-form-submit:focus-visible,
-.staff-form-cancel:focus-visible {
-  outline: 2px solid #3b82f6;
-  outline-offset: 2px;
-}
-
-/* ---- Form error ---- */
-.staff-form-error {
-  font-size: 13px;
-  color: #ef4444;
-  margin: 0;
-  padding: 6px 10px;
-  background: rgba(239, 68, 68, 0.08);
-  border-radius: 6px;
-}
-
-/* ---- Admin list section ---- */
+/* ---- Staff list section ---- */
 .staff-list {
   display: flex;
   flex-direction: column;
@@ -589,7 +634,7 @@
   gap: 10px;
 }
 
-/* ---- Admin card (list variant) ---- */
+/* ---- Staff card (list variant) ---- */
 .staff-card-header {
   display: flex;
   align-items: center;
@@ -677,6 +722,15 @@
 
   .staff-form-grid {
     grid-template-columns: 1fr;
+  }
+
+  .staff-form-btn-group {
+    flex-wrap: wrap;
+  }
+
+  .staff-form-btn {
+    flex: none;
+    width: calc(50% - 3px);
   }
 
   .staff-form-actions {

@@ -52,7 +52,7 @@ const MENU_ITEMS: MenuItem[] = [
   { id: 'pos', label: 'POS', icon: '🛍️' },
   { id: 'orders', label: 'Orders', icon: '📋' },
   { id: 'inventory', label: 'Inventory', icon: '📦' },
-  { id: 'staff', label: 'Staff', icon: '🧑‍💼' },
+  { id: 'staff', label: 'Staff', icon: '👤' },
   { id: 'customers', label: 'Customers', icon: '👥' },
   { id: 'reports', label: 'Reports', icon: '📈' },
   { id: 'settings', label: 'Settings', icon: '⚙️' },

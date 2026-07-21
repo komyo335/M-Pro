@@ -1,14 +1,5 @@
-<<<<<<< HEAD
-<<<<<<< HEAD
-import { useState} from 'react';
-=======
-import { useState } from 'react';
->>>>>>> test-1
-import type { StaffRole, StaffShift, StaffMember } from '../data/staff';
-=======
 import { useState } from 'react';
 import type { StaffMember, StaffRole, StaffShift } from '../data/staff';
->>>>>>> dev-1
 import { STAFF_ROLES, SHIFTS, loadStaff, saveStaff } from '../data/staff';
 import './StaffManagement.css';
 
